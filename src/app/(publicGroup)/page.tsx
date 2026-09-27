@@ -1,6 +1,5 @@
-
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -40,15 +39,15 @@ export default function Home() {
 
           <div className="flex justify-center">
             <div className="flex size-72 items-center justify-center rounded-full border">
-                  {/*  */}
-                  <span>
-                        <Image
-                        src="/daanlogo.png"
-                         alt="Daan logo"
-                          width={400}
-                           height={400}/>
-
-                  </span>
+              {/*  */}
+              <span>
+                <Image
+                  src="/daanlogo.png"
+                  alt="Daan logo"
+                  width={400}
+                  height={400}
+                />
+              </span>
             </div>
           </div>
         </div>

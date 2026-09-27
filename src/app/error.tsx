@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function Error({
+export default function ErrorPage({
   error,
   unstable_retry,
 }: {
@@ -18,6 +18,7 @@ export default function Error({
     <div>
       <h2>Something went wrong!</h2>
       <button
+        type="button"
         onClick={
           // Attempt to recover by re-fetching and re-rendering the segment
           () => unstable_retry()
