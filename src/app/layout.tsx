@@ -1,10 +1,15 @@
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
-import { cn } from "@/lib/utils";
-import "./globals.css";
-import QueryProvider from "@/providers/query.provider";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+import { cn } from "@/lib/utils";
+import Providers from "@/providers";
+
+import "./globals.css";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export default async function RootLayout({
   children,
@@ -18,10 +23,8 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Toaster position="top-right" richColors />
-        {/* Navbar */}
-        <QueryProvider>{children}</QueryProvider>
 
-        {/* Footer */}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

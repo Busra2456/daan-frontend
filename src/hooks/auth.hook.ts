@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { forgotPassword, getMeAction, googleLoginAction, loginAction, refreshTokenAction, registerUser, resetPassword, verifyEmail } from "@/api";
+import { logoutAction } from "@/app/(authGroup)/_actions/authActions";
 
 export function useRegistration() {
   return useMutation({
@@ -47,5 +48,11 @@ export function useRefreshTokenAction() {
   return useMutation({
     mutationFn:refreshTokenAction,
   });
+}
+
+export function useLogoutAction() {
+  return useMutation({
+     mutationFn: logoutAction
+     });
 }
 

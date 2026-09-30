@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type z from "zod";
 
-import { getMeAction, loginAction } from "@/api";
+import { getMeAction, loginAction,} from "@/api";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -19,12 +19,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { UserLoginZodSchema } from "@/validation";
+import GoogleAuthButton from "./GoogleAuthButton";
+import { useGoogleAuth } from "./GoogleHandler";
 
 export function LoginForm() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
+  
+
+const { handleGoogleLogin } = useGoogleAuth();
 
   type LoginFormValues = z.infer<typeof UserLoginZodSchema>;
 
@@ -37,6 +42,7 @@ export function LoginForm() {
     validators: {
       onSubmit: UserLoginZodSchema,
     },
+    
 
     onSubmit: async ({ value }) => {
       setIsLoading(true);
@@ -218,6 +224,7 @@ export function LoginForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Login"}
           </Button>
+ <GoogleAuthButton onSuccess={handleGoogleLogin} />
         </FieldGroup>
       </form>
 
@@ -231,5 +238,6 @@ export function LoginForm() {
         </Link>
       </p>
     </div>
+    
   );
 }

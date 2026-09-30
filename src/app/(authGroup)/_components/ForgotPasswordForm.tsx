@@ -48,7 +48,7 @@ export function ForgotPasswordForm() {
             email: forgotPasswordData.email,
           });
 
-          router.push(`/forgot-password/verify?${params.toString()}`);
+          router.push(`/forgot-password${params.toString()}`);
         },
         onError: (error) => {
           toast.add({

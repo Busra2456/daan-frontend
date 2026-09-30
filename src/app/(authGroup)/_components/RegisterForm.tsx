@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { useRegistration } from "@/hooks/auth.hook";
 import { UserRegistrationZodSchema } from "@/validation";
+import GoogleAuthButton from "./GoogleAuthButton";
+import { useGoogleAuth } from "./GoogleHandler";
 
 export function RegisterForm() {
   const { mutate: registration } = useRegistration();
@@ -26,6 +28,8 @@ export function RegisterForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading] = useState(false);
+
+const { handleGoogleRegister } = useGoogleAuth();  
 
   type RegisterFormValues = z.infer<typeof UserRegistrationZodSchema>;
 
@@ -202,6 +206,8 @@ export function RegisterForm() {
           <Button type="submit" className="w-full">
             {loading ? "Creating Account..." : "Create Account"}
           </Button>
+           <GoogleAuthButton onSuccess={handleGoogleRegister} />
+          
         </FieldGroup>
       </form>
 

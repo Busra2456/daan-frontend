@@ -1,5 +1,6 @@
 export {
   loginAction,
+  logoutAction,
   registerUser,
   verifyEmail,
   forgotPassword,

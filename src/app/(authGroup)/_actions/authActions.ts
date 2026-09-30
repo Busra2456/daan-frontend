@@ -59,6 +59,12 @@ export async function refreshTokenAction() {
   });
 }
 
+export async function logoutAction() {
+  return api("/api/auth/logout", {
+    method: "POST",
+  });
+}
+
 export async function googleLoginAction(payload: GoogleLoginPayload) {
   return api("/api/auth/google-login", {
     method: "POST",
