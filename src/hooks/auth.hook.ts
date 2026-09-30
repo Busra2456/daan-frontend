@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { registerUser, verifyEmail } from "@/api";
+import { forgotPassword, getMeAction, googleLoginAction, loginAction, refreshTokenAction, registerUser, resetPassword, verifyEmail } from "@/api";
 
 export function useRegistration() {
   return useMutation({
@@ -12,3 +12,40 @@ export function useVerifyEmail() {
     mutationFn: verifyEmail,
   });
 }
+
+export function useLoginAction() {
+  return useMutation({
+    mutationFn: loginAction,
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: forgotPassword,
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: resetPassword,
+  });
+}
+
+
+export function useGetMeAction() {
+  return useMutation({
+    mutationFn:getMeAction,
+  });
+}
+
+export function useGoogleLoginAction() {
+  return useMutation({
+    mutationFn:googleLoginAction,
+  });
+}
+export function useRefreshTokenAction() {
+  return useMutation({
+    mutationFn:refreshTokenAction,
+  });
+}
+

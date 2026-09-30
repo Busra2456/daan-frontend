@@ -1,11 +1,16 @@
+
+import { Suspense } from "react";
 import VerifyEmailForm from "../../_components/VerifyEmailForm";
 
 export default function VerifyEmailPage() {
   return (
-    <div className="flex min-h-svh items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <VerifyEmailForm />
+        <Suspense fallback={<div>Loading...</div>}>
+        
+          <VerifyEmailForm />
+        </Suspense>
       </div>
-    </div>
+    </main>
   );
 }

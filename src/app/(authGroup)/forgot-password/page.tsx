@@ -1,9 +1,8 @@
-
 import Image from "next/image";
 import Link from "next/link";
-import { LoginForm } from "../_components/LoginForm";
+import { ForgotPasswordForm } from "../_components/ForgotPasswordForm";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       {/* Left Side */}
@@ -14,7 +13,6 @@ export default function LoginPage() {
             <Image
               src="/daanlogo.png"
               alt="Daan logo"
-              loading="eager"
               width={42}
               height={42}
               className="rounded-full"
@@ -29,10 +27,10 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Login Form */}
+        {/* Forgot Password Form */}
         <div className="flex flex-1 items-center justify-center py-10">
           <div className="w-full max-w-sm">
-            <LoginForm />
+            <ForgotPasswordForm />
           </div>
         </div>
 
@@ -44,12 +42,10 @@ export default function LoginPage() {
 
       {/* Right Side */}
       <div className="relative hidden overflow-hidden bg-muted lg:flex">
-        {/* Background decoration */}
         <div className="absolute -right-32 -top-32 size-96 rounded-full bg-primary/10" />
         <div className="absolute -bottom-40 -left-40 size-[28rem] rounded-full bg-primary/10" />
 
         <div className="relative z-10 flex w-full flex-col items-center justify-center px-12 text-center">
-          {/* Logo */}
           <div className="mb-8 rounded-3xl bg-background p-6 shadow-sm">
             <Image
               src="/daanlogo.png"
@@ -60,7 +56,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Heading */}
           <h2 className="max-w-md text-4xl font-bold tracking-tight">
             Donate with Trust
           </h2>
@@ -70,7 +65,6 @@ export default function LoginPage() {
             support through a trusted and verified platform.
           </p>
 
-          {/* Features */}
           <div className="mt-8 grid grid-cols-3 gap-3">
             <div className="rounded-xl bg-background px-4 py-3 shadow-sm">
               <p className="text-sm font-semibold">Verified</p>

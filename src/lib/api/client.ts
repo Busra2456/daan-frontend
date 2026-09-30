@@ -5,4 +5,6 @@ export const api = ofetch.create({
   headers: {
     "Content-Type": "application/json",
   },
+  	credentials: "include",
+
 });
