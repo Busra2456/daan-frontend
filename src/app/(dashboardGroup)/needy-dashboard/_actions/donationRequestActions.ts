@@ -5,3 +5,10 @@ export async function getMyDonationRequests() {
     method: "GET",
   });
 }
+
+
+export async function getDonationRequestById(requestId: string) {
+  return api(`/api/donation-requests/${requestId}`, {
+    method: "GET",
+  });
+}
