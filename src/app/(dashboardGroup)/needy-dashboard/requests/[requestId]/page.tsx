@@ -1,6 +1,7 @@
 "use client";
 
 import { getDonationRequestById } from "@/api";
+import { DonationRequestResponse } from "@/types/donation-request.type";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";

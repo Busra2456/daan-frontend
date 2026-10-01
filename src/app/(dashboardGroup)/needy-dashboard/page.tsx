@@ -5,6 +5,7 @@ import { TbCurrencyTaka } from "react-icons/tb";
 import { getMyDonationRequests } from "@/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { MyDonationRequestsResponse } from "@/types/donation-request.type";
 
 
 export default function NeedyDashboardPage() {
