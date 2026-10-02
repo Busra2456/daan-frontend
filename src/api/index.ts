@@ -13,13 +13,21 @@ export {
 export {
   getMyDonationRequests,
    getDonationRequestById,
-} from "../app/(dashboardGroup)/needy-dashboard/_actions/donationRequestActions";
+   getReceivedDonations
+} from "../app/(dashboardGroup)/needy-dashboard/_actions/donationActions";
 
 export {
 	getVerifiedDonationRequests,
 } from "../app/(dashboardGroup)/donor-dashboard/_actions/donationRequestActions";
 
 export {
+	createDonation,
+createPayment,
+getMyDonation
+} from "../app/(dashboardGroup)/donor-dashboard/_actions/donationActions";
+
+export {
 	getPendingDonationRequests,
-  verifyDonationRequest
+  verifyDonationRequest,
+   rejectDonationRequest
 } from "../app/(dashboardGroup)/admin-dashboard/_actions/donationRequestActions";

@@ -1,19 +1,28 @@
-
 "use client";
-import { TbCurrencyTaka } from "react-icons/tb";
 
-import { getMyDonationRequests } from "@/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { MyDonationRequestsResponse } from "@/types/donation-request.type";
+import { TbCurrencyTaka } from "react-icons/tb";
 
+import { getMyDonationRequests, getReceivedDonations } from "@/api";
+import type {
+  MyDonationRequestsResponse,
+} from "@/types/donation-request.type";
 
 export default function NeedyDashboardPage() {
-  const { data, isLoading, isError } =
-    useQuery<MyDonationRequestsResponse>({
-      queryKey: ["my-donation-requests"],
-      queryFn: getMyDonationRequests,
-    });
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery<MyDonationRequestsResponse>({
+    queryKey: ["my-donation-requests"],
+    queryFn: getMyDonationRequests,
+  });
+
+  const { data: receivedData } = useQuery({
+    queryKey: ["received-donations"],
+    queryFn: getReceivedDonations,
+  });
 
   const requests = data?.data ?? [];
 
@@ -26,6 +35,8 @@ export default function NeedyDashboardPage() {
   const verifiedRequests = requests.filter(
     (request) => request.status === "VERIFIED",
   ).length;
+
+  const totalReceived = receivedData?.data.totalReceived ?? 0;
 
   return (
     <main className="mx-auto max-w-7xl p-6">
@@ -81,7 +92,9 @@ export default function NeedyDashboardPage() {
             </div>
 
             <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">Pending</p>
+              <p className="text-sm text-muted-foreground">
+                Pending
+              </p>
 
               <p className="mt-2 text-3xl font-bold">
                 {pendingRequests}
@@ -89,7 +102,9 @@ export default function NeedyDashboardPage() {
             </div>
 
             <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">Verified</p>
+              <p className="text-sm text-muted-foreground">
+                Verified
+              </p>
 
               <p className="mt-2 text-3xl font-bold">
                 {verifiedRequests}
@@ -97,9 +112,14 @@ export default function NeedyDashboardPage() {
             </div>
 
             <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">Received</p>
+              <p className="text-sm text-muted-foreground">
+                Received
+              </p>
 
-              <p className="mt-2 text-3xl font-bold">৳0</p>
+              <p className="mt-2 flex items-center text-3xl font-bold">
+                <TbCurrencyTaka />
+                {totalReceived.toLocaleString()}
+              </p>
             </div>
           </section>
 
@@ -158,14 +178,16 @@ export default function NeedyDashboardPage() {
                     </div>
 
                     <div className="mt-4 flex flex-col border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center justify-between sm:justify-start">
-                        <TbCurrencyTaka className="text-2xl"/><p className="font-semibold ">
-                           {Number(
+                      <div className="flex items-center">
+                        <TbCurrencyTaka className="text-2xl" />
+
+                        <p className="font-semibold">
+                          {Number(
                             request.requiredAmount,
                           ).toLocaleString()}
                         </p>
 
-                        <p className="text-sm ml-2 text-muted-foreground">
+                        <p className="ml-2 text-sm text-muted-foreground">
                           {new Date(
                             request.createdAt,
                           ).toLocaleDateString()}
@@ -177,7 +199,7 @@ export default function NeedyDashboardPage() {
                         href={`/needy-dashboard/requests/${request.id}`}
                         className="text-sm font-medium text-primary hover:underline"
                       >
-                        View Details 
+                        View Details
                       </Link>
                     </div>
                   </div>

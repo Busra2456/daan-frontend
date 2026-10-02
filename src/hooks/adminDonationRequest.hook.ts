@@ -7,6 +7,7 @@ import {
 
 import {
   getPendingDonationRequests,
+  rejectDonationRequest,
   verifyDonationRequest,
 } from "@/app/(dashboardGroup)/admin-dashboard/_actions/donationRequestActions";
 import { PendingDonationRequestsResponse } from "@/types/donation-request.type";
@@ -31,3 +32,28 @@ export function useVerifyDonationRequest() {
     },
   });
 }
+
+export function useRejectDonationRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      requestId,
+      rejectionReason,
+    }: {
+      requestId: string;
+      rejectionReason: string;
+    }) =>
+      rejectDonationRequest(
+        requestId,
+        rejectionReason,
+      ),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["pending-donation-requests"],
+      });
+    },
+  });
+}
+

@@ -1,22 +1,32 @@
 "use client";
 
-import { useVerifiedDonationRequests } from "@/hooks";
 import Link from "next/link";
 import { TbCurrencyTaka } from "react-icons/tb";
 
+import { useGetMyDonations, useVerifiedDonationRequests } from "@/hooks";
+
 
 export default function DonorDashboardPage() {
-	const { data, isLoading, isError } =
-  useVerifiedDonationRequests();
-  ;
+	const {
+		data,
+		isLoading,
+		isError,
+	} = useVerifiedDonationRequests();
+
+	const {
+		data: donationsData,
+		isLoading: donationsLoading,
+	} = useGetMyDonations();
 
 	const requests = data?.data ?? [];
+	const donations = donationsData?.data ?? [];
 
 	if (isLoading) {
 		return (
 			<main className="mx-auto max-w-7xl p-6">
 				<div className="mb-8">
 					<div className="h-9 w-64 animate-pulse rounded-md bg-muted" />
+
 					<div className="mt-3 h-5 w-96 animate-pulse rounded-md bg-muted" />
 				</div>
 
@@ -51,6 +61,7 @@ export default function DonorDashboardPage() {
 
 	return (
 		<main className="mx-auto max-w-7xl p-6">
+			{/* Header */}
 			<div className="mb-8">
 				<h1 className="text-3xl font-bold tracking-tight">
 					Donation Requests
@@ -61,6 +72,7 @@ export default function DonorDashboardPage() {
 				</p>
 			</div>
 
+			{/* Verified Requests */}
 			{requests.length === 0 ? (
 				<div className="rounded-xl border bg-card p-10 text-center">
 					<h2 className="text-xl font-semibold">
@@ -138,6 +150,81 @@ export default function DonorDashboardPage() {
 					))}
 				</div>
 			)}
+
+			{/* Donation History */}
+			<section className="mt-12">
+				<div className="mb-5">
+					<h2 className="text-2xl font-bold">
+						Donation History
+					</h2>
+
+					<p className="mt-1 text-sm text-muted-foreground">
+						Track the donations you have made to verified requests.
+					</p>
+				</div>
+
+				{donationsLoading ? (
+					<div className="rounded-xl border p-6">
+						<p className="text-sm text-muted-foreground">
+							Loading donation history...
+						</p>
+					</div>
+				) : donations.length === 0 ? (
+					<div className="rounded-xl border bg-card p-8 text-center">
+						<h3 className="font-semibold">
+							No donations yet
+						</h3>
+
+						<p className="mt-2 text-sm text-muted-foreground">
+							Your donations will appear here after you make a
+							donation.
+						</p>
+					</div>
+				) : (
+					<div className="space-y-4">
+						{donations.map((donation) => (
+							<article
+								key={donation.id}
+								className="rounded-xl border bg-card p-5"
+							>
+								<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+									<div>
+										<h3 className="font-semibold">
+											{donation.request.title}
+										</h3>
+
+										<p className="mt-1 text-sm text-muted-foreground">
+											{new Date(
+												donation.createdAt,
+											).toLocaleDateString()}
+										</p>
+									</div>
+
+									<div className="flex items-center gap-1">
+										<TbCurrencyTaka className="text-xl" />
+
+										<span className="text-xl font-bold">
+											{Number(
+												donation.amount,
+											).toLocaleString()}
+										</span>
+									</div>
+								</div>
+
+								<div className="mt-4 flex flex-wrap gap-2 border-t pt-4">
+									<span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+										{donation.status}
+									</span>
+
+									<span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">
+										Payment: {donation.paymentStatus}
+									</span>
+								</div>
+							</article>
+						))}
+					</div>
+				)}
+			</section>
 		</main>
 	);
 }

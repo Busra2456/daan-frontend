@@ -12,3 +12,15 @@ export async function verifyDonationRequest(requestId: string) {
     method: "PATCH",
   });
 }
+
+export async function rejectDonationRequest(
+	requestId: string,
+	rejectionReason: string,
+) {
+	return api(`/api/admin/donation-requests/${requestId}/reject`, {
+		method: "PATCH",
+		body: {
+			rejectionReason,
+		},
+	});
+}

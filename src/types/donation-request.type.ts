@@ -98,3 +98,79 @@ export interface PendingDonationRequestsResponse {
   message: string;
   data: PendingDonationRequest[];
 }
+
+export interface CreateDonationPayload {
+  amount: number;
+  requestId: string;
+}
+
+export interface DonorRequestDetailsPageProps {
+  params: Promise<{
+    requestId: string;
+  }>;
+}
+export interface DonationFormProps {
+  requestId: string;
+  requiredAmount: string;
+}
+
+export interface ReceivedDonation {
+  id: string;
+  amount: string;
+  status: "COMPLETED";
+  paymentId: string | null;
+  paymentStatus: string;
+  donorId: string;
+  requestId: string;
+  createdAt: string;
+  updatedAt: string;
+  request: {
+    id: string;
+    title: string;
+  };
+  donor: {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+  };
+}
+
+export interface ReceivedDonationsResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: {
+    totalReceived: number;
+    donations: ReceivedDonation[];
+  };
+}
+
+
+export interface MyDonation {
+	id: string;
+	amount: string;
+	status: string;
+	paymentId: string | null;
+	paymentStatus: string;
+	donorId: string;
+	requestId: string;
+	createdAt: string;
+	updatedAt: string;
+
+	request: {
+		id: string;
+		title: string;
+		description: string;
+		requiredAmount: string;
+		status: string;
+		situationVideo: string | null;
+		situationAudio: string | null;
+	};
+}
+
+export interface MyDonationsResponse {
+	success: boolean;
+	statusCode: number;
+	message: string;
+	data: MyDonation[];
+}

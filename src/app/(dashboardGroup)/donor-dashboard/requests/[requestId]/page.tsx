@@ -5,15 +5,14 @@ import { ArrowLeft, MapPin, UserRound } from "lucide-react";
 import Link from "next/link";
 import { TbCurrencyTaka } from "react-icons/tb";
 
-import { getDonationRequestById } from "@/app/(dashboardGroup)/needy-dashboard/_actions/donationRequestActions";
+
 import Image from "next/image";
 import { use } from "react";
+import { DonorRequestDetailsPageProps } from "@/types/donation-request.type";
+import DonationForm from "../../_components/DonationForm";
+import { getDonationRequestById } from "@/api";
 
-interface DonorRequestDetailsPageProps {
-  params: Promise<{
-    requestId: string;
-  }>;
-}
+
 
 export default function DonorRequestDetailsPage({
   params,
@@ -177,17 +176,11 @@ export default function DonorRequestDetailsPage({
             )}
 
             <div className="mt-6 border-t pt-5">
-              <button
-                type="button"
-                className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                Donate Now
-              </button>
-
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                Secure payment will be available here.
-              </p>
-            </div>
+              <DonationForm
+  requestId={request.id}
+  requiredAmount={request.requiredAmount}
+/>
+ </div>
           </aside>
         </div>
       </div>
