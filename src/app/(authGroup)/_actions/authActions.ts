@@ -71,3 +71,14 @@ export async function googleLoginAction(payload: GoogleLoginPayload) {
     body: payload,
   });
 }
+
+export async function demoLoginAction(
+	role: "ADMIN" | "DONOR" | "NEEDY",
+) {
+	return api("/api/auth/demo-login", {
+		method: "POST",
+		body: {
+			role,
+		},
+	});
+}

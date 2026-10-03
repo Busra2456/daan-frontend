@@ -7,7 +7,8 @@ export {
   resetPassword,
   getMeAction,
   refreshTokenAction,
-  googleLoginAction
+  googleLoginAction,
+  demoLoginAction
 } from "../app/(authGroup)/_actions/authActions";
 
 export {
