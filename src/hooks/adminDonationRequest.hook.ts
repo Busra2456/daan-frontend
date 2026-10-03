@@ -12,11 +12,16 @@ import {
 } from "@/app/(dashboardGroup)/admin-dashboard/_actions/donationRequestActions";
 import { PendingDonationRequestsResponse } from "@/types/donation-request.type";
 
-export function usePendingDonationRequests() {
-  return useQuery<PendingDonationRequestsResponse>({
-    queryKey: ["pending-donation-requests"],
-    queryFn: getPendingDonationRequests,
-  });
+export function usePendingDonationRequests(
+	options?: {
+		enabled?: boolean;
+	},
+) {
+	return useQuery<PendingDonationRequestsResponse>({
+		queryKey: ["pending-donation-requests"],
+		queryFn: getPendingDonationRequests,
+		enabled: options?.enabled ?? true,
+	});
 }
 
 export function useVerifyDonationRequest() {

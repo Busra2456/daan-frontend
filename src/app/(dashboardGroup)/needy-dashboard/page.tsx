@@ -1,15 +1,22 @@
+
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { TbCurrencyTaka } from "react-icons/tb";
 
-import { getMyDonationRequests, getReceivedDonations } from "@/api";
+import {
+  deleteDonationRequest,
+  getMyDonationRequests,
+  getReceivedDonations,
+} from "@/api";
 import type {
   MyDonationRequestsResponse,
 } from "@/types/donation-request.type";
 
 export default function NeedyDashboardPage() {
+  const queryClient = useQueryClient();
+
   const {
     data,
     isLoading,
@@ -24,6 +31,11 @@ export default function NeedyDashboardPage() {
     queryFn: getReceivedDonations,
   });
 
+  const { mutateAsync: deleteRequest, isPending: isDeleting } =
+    useMutation({
+      mutationFn: deleteDonationRequest,
+    });
+
   const requests = data?.data ?? [];
 
   const totalRequests = requests.length;
@@ -37,6 +49,32 @@ export default function NeedyDashboardPage() {
   ).length;
 
   const totalReceived = receivedData?.data.totalReceived ?? 0;
+
+  const handleDelete = async (requestId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this donation request?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteRequest(requestId);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["my-donation-requests"],
+      });
+
+      window.alert("Donation request deleted successfully.");
+    } catch (error) {
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete donation request.",
+      );
+    }
+  };
 
   return (
     <main className="mx-auto max-w-7xl p-6">
@@ -194,13 +232,41 @@ export default function NeedyDashboardPage() {
                         </p>
                       </div>
 
-                      {/* View Details */}
-                      <Link
-                        href={`/needy-dashboard/requests/${request.id}`}
-                        className="text-sm font-medium text-primary hover:underline"
-                      >
-                        View Details
-                      </Link>
+                      {/* Actions */}
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* View Details */}
+                        <Link
+                          href={`/needy-dashboard/requests/${request.id}`}
+                          className="text-sm font-medium text-primary hover:underline"
+                        >
+                          View Details
+                        </Link>
+
+                        {/* Edit + Delete only for PENDING */}
+                        {request.status === "PENDING" && (
+                          <>
+                            <Link
+                              href={`/needy-dashboard/requests/${request.id}/edit`}
+                              className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted"
+                            >
+                              Edit
+                            </Link>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDelete(request.id)
+                              }
+                              disabled={isDeleting}
+                              className="rounded-md border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {isDeleting
+                                ? "Deleting..."
+                                : "Delete"}
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

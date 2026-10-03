@@ -174,3 +174,23 @@ export interface MyDonationsResponse {
 	message: string;
 	data: MyDonation[];
 }
+
+export interface UpdateDonationRequestPayload {
+  title?: string;
+  description?: string;
+  requiredAmount?: number;
+  situationVideo?: string;
+  situationAudio?: string;
+}
+export interface UpdateDonationRequestPayload {
+  title?: string;
+  description?: string;
+  requiredAmount?: number;
+  situationVideo?: string;
+  situationAudio?: string;
+}
+
+export interface UpdateDonationRequestInput {
+  requestId: string;
+  payload: UpdateDonationRequestPayload;
+}

@@ -14,7 +14,9 @@ export {
 export {
   getMyDonationRequests,
    getDonationRequestById,
-   getReceivedDonations
+   getReceivedDonations,
+   updateDonationRequest,
+   deleteDonationRequest
 } from "../app/(dashboardGroup)/needy-dashboard/_actions/donationActions";
 
 export {

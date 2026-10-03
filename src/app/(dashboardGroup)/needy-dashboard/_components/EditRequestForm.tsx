@@ -1,8 +1,10 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "@tanstack/react-form";
 
+import { useDonationRequestById, useUpdateDonationRequest } from "@/hooks/donation-request.hook";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -11,17 +13,27 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import {
   CreateDonationRequestZodSchema,
   type CreateDonationRequestFormValues,
 } from "@/validation";
-import { Textarea } from "@/components/ui/textarea";
-import { useQueryClient } from "@tanstack/react-query";
 
-export default function CreateRequestForm() {
+interface EditRequestFormProps {
+  requestId: string;
+}
+
+export default function EditRequestForm({
+  requestId,
+}: EditRequestFormProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError } = useDonationRequestById(requestId);
+
+  const { mutateAsync: updateRequest } = useUpdateDonationRequest();
+
+  const request = data?.data;
 
   const form = useForm({
     defaultValues: {
@@ -38,51 +50,28 @@ export default function CreateRequestForm() {
 
     onSubmit: async ({ value }) => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/donation-requests`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              title: value.title,
-              description: value.description,
-              requiredAmount: value.requiredAmount,
-              ...(value.situationVideo && {
-                situationVideo: value.situationVideo,
-              }),
-              ...(value.situationAudio && {
-                situationAudio: value.situationAudio,
-              }),
-            }),
+        await updateRequest({
+          requestId,
+          payload: {
+            title: value.title,
+            description: value.description,
+            requiredAmount: value.requiredAmount,
+            situationVideo: value.situationVideo || undefined,
+            situationAudio: value.situationAudio || undefined,
           },
-        );
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(
-            result.message || "Failed to create donation request",
-          );
-        }
+        });
 
         toast.add({
-          title: "Request Created",
-          description:
-            "Your donation request has been submitted for verification.",
+          title: "Request Updated",
+          description: "Your donation request has been updated successfully.",
           type: "success",
         });
 
-        await queryClient.invalidateQueries({
-  queryKey: ["my-donation-requests"],
-});
-
-        router.push("/needy-dashboard");
+        router.push(`/needy-dashboard/requests/${requestId}`);
+        router.refresh();
       } catch (error) {
         toast.add({
-          title: "Request Failed",
+          title: "Update Failed",
           description:
             error instanceof Error
               ? error.message
@@ -92,6 +81,46 @@ export default function CreateRequestForm() {
       }
     },
   });
+
+  useEffect(() => {
+    if (!request) return;
+
+    form.setFieldValue("title", request.title);
+    form.setFieldValue("description", request.description);
+    form.setFieldValue("requiredAmount", Number(request.requiredAmount));
+    form.setFieldValue("situationVideo", request.situationVideo ?? "");
+    form.setFieldValue("situationAudio", request.situationAudio ?? "");
+  }, [request, form]);
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border bg-card p-6">
+        <p className="text-muted-foreground">Loading request...</p>
+      </div>
+    );
+  }
+
+  if (isError || !data?.success || !request) {
+    return (
+      <div className="rounded-xl border border-destructive/30 bg-card p-6">
+        <p className="text-destructive">
+          Failed to load this donation request.
+        </p>
+      </div>
+    );
+  }
+
+  if (request.status !== "PENDING") {
+    return (
+      <div className="rounded-xl border bg-card p-6">
+        <h2 className="font-semibold">Request Cannot Be Edited</h2>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          Only pending donation requests can be updated.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -110,19 +139,18 @@ export default function CreateRequestForm() {
               <Input
                 id={field.name}
                 name={field.name}
-                placeholder="Example: Need financial help for medical treatment"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
 
               {field.state.meta.errors.length > 0 && (
-  <FieldError>
-    {typeof field.state.meta.errors[0] === "string"
-      ? field.state.meta.errors[0]
-      : field.state.meta.errors[0]?.message}
-  </FieldError>
-)}
+                <FieldError>
+                  {typeof field.state.meta.errors[0] === "string"
+                    ? field.state.meta.errors[0]
+                    : field.state.meta.errors[0]?.message}
+                </FieldError>
+              )}
             </Field>
           )}
         </form.Field>
@@ -135,20 +163,19 @@ export default function CreateRequestForm() {
               <Textarea
                 id={field.name}
                 name={field.name}
-                placeholder="Explain your situation and why you need help..."
                 rows={6}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
 
-             {field.state.meta.errors.length > 0 && (
-  <FieldError>
-    {typeof field.state.meta.errors[0] === "string"
-      ? field.state.meta.errors[0]
-      : field.state.meta.errors[0]?.message}
-  </FieldError>
-)}
+              {field.state.meta.errors.length > 0 && (
+                <FieldError>
+                  {typeof field.state.meta.errors[0] === "string"
+                    ? field.state.meta.errors[0]
+                    : field.state.meta.errors[0]?.message}
+                </FieldError>
+              )}
             </Field>
           )}
         </form.Field>
@@ -165,7 +192,6 @@ export default function CreateRequestForm() {
                 name={field.name}
                 type="number"
                 min="1"
-                placeholder="50000"
                 value={
                   field.state.value === 0 ? "" : String(field.state.value)
                 }
@@ -175,13 +201,13 @@ export default function CreateRequestForm() {
                 }
               />
 
-             {field.state.meta.errors.length > 0 && (
-  <FieldError>
-    {typeof field.state.meta.errors[0] === "string"
-      ? field.state.meta.errors[0]
-      : field.state.meta.errors[0]?.message}
-  </FieldError>
-)}
+              {field.state.meta.errors.length > 0 && (
+                <FieldError>
+                  {typeof field.state.meta.errors[0] === "string"
+                    ? field.state.meta.errors[0]
+                    : field.state.meta.errors[0]?.message}
+                </FieldError>
+              )}
             </Field>
           )}
         </form.Field>
@@ -200,19 +226,18 @@ export default function CreateRequestForm() {
                 id={field.name}
                 name={field.name}
                 type="url"
-                placeholder="https://example.com/video"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
 
               {field.state.meta.errors.length > 0 && (
-  <FieldError>
-    {typeof field.state.meta.errors[0] === "string"
-      ? field.state.meta.errors[0]
-      : field.state.meta.errors[0]?.message}
-  </FieldError>
-)}
+                <FieldError>
+                  {typeof field.state.meta.errors[0] === "string"
+                    ? field.state.meta.errors[0]
+                    : field.state.meta.errors[0]?.message}
+                </FieldError>
+              )}
             </Field>
           )}
         </form.Field>
@@ -231,19 +256,18 @@ export default function CreateRequestForm() {
                 id={field.name}
                 name={field.name}
                 type="url"
-                placeholder="https://example.com/audio"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
 
               {field.state.meta.errors.length > 0 && (
-  <FieldError>
-    {typeof field.state.meta.errors[0] === "string"
-      ? field.state.meta.errors[0]
-      : field.state.meta.errors[0]?.message}
-  </FieldError>
-)}
+                <FieldError>
+                  {typeof field.state.meta.errors[0] === "string"
+                    ? field.state.meta.errors[0]
+                    : field.state.meta.errors[0]?.message}
+                </FieldError>
+              )}
             </Field>
           )}
         </form.Field>
@@ -254,8 +278,8 @@ export default function CreateRequestForm() {
           disabled={form.state.isSubmitting}
         >
           {form.state.isSubmitting
-            ? "Submitting Request..."
-            : "Submit Donation Request"}
+            ? "Updating Request..."
+            : "Update Donation Request"}
         </Button>
       </FieldGroup>
     </form>
