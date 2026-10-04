@@ -8,7 +8,7 @@ export {
   getMeAction,
   refreshTokenAction,
   googleLoginAction,
-  demoLoginAction
+  demoLoginAction,
 } from "../app/(authGroup)/_actions/authActions";
 
 export {
@@ -32,5 +32,13 @@ getMyDonation
 export {
 	getPendingDonationRequests,
   verifyDonationRequest,
-   rejectDonationRequest
+   rejectDonationRequest,
+   getAllDonationRequests,
+   getAdminDonationRequestDetails
 } from "../app/(dashboardGroup)/admin-dashboard/_actions/donationRequestActions";
+
+export {
+  getAllUsers,
+  getUserById,
+  updateUserStatus,
+} from "@/app/(dashboardGroup)/admin-dashboard/_actions/userActions";

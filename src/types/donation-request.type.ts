@@ -1,9 +1,9 @@
 export type DonationRequestStatus =
 	| "PENDING"
 	| "VERIFIED"
+	| "REJECTED"
 	| "DONATIONS"
 	| "COMPLETED";
-
 export interface DonationRequest {
 	id: string;
 	title: string;
@@ -182,15 +182,49 @@ export interface UpdateDonationRequestPayload {
   situationVideo?: string;
   situationAudio?: string;
 }
-export interface UpdateDonationRequestPayload {
-  title?: string;
-  description?: string;
-  requiredAmount?: number;
-  situationVideo?: string;
-  situationAudio?: string;
-}
+
 
 export interface UpdateDonationRequestInput {
   requestId: string;
   payload: UpdateDonationRequestPayload;
+}
+
+export interface AllDonationRequestsResponse {
+	success: boolean;
+	statusCode: number;
+	message: string;
+	data: DonationRequest[];
+}
+
+export interface DonationRequestStatusListProps {
+      title: string;
+      description: string;
+      status: DonationRequest;
+}
+
+
+
+export interface DonationRequest {
+	id: string;
+	title: string;
+	description: string;
+	requiredAmount: string;
+	situationVideo: string | null;
+	situationAudio: string | null;
+	status: DonationRequestStatus;
+	rejectionReason: string | null;
+	reviewedAt: string | null;
+	needyId: string;
+	reviewedById: string | null;
+	createdAt: string;
+	updatedAt: string;
+
+	needy: {
+		id: string;
+		name: string;
+		email: string;
+		phone: string | null;
+		address: string | null;
+		imageUrl: string | null;
+	};
 }

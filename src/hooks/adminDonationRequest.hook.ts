@@ -6,11 +6,29 @@ import {
 
 
 import {
+  getAdminDonationRequestDetails,
+  getAllDonationRequests,
   getPendingDonationRequests,
   rejectDonationRequest,
   verifyDonationRequest,
 } from "@/app/(dashboardGroup)/admin-dashboard/_actions/donationRequestActions";
-import { PendingDonationRequestsResponse } from "@/types/donation-request.type";
+import {PendingDonationRequestsResponse } from "@/types/donation-request.type";
+import { AllDonationRequestsResponse } from "@/types/admin.type";
+
+export function useAllDonationRequests() {
+	return useQuery<AllDonationRequestsResponse>({
+		queryKey: ["admin-all-donation-requests"],
+		queryFn: getAllDonationRequests,
+	});
+}
+
+export function useAdminDonationRequestDetails(requestId: string) {
+	return useQuery({
+		queryKey: ["admin-donation-request", requestId],
+		queryFn: () => getAdminDonationRequestDetails(requestId),
+		enabled: !!requestId,
+	});
+}
 
 export function usePendingDonationRequests(
 	options?: {
@@ -61,4 +79,5 @@ export function useRejectDonationRequest() {
     },
   });
 }
+
 

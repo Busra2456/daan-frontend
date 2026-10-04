@@ -1,6 +1,12 @@
 import { api } from "@/lib/api/client";
 import { PendingDonationRequestsResponse } from "@/types/donation-request.type";
 
+export async function getAllDonationRequests() {
+	return api("/api/admin/donation-requests", {
+		method: "GET",
+	});
+}
+
 export async function getPendingDonationRequests(): Promise<PendingDonationRequestsResponse> {
   return api("/api/admin/donation-requests/pending", {
     method: "GET",
@@ -22,5 +28,13 @@ export async function rejectDonationRequest(
 		body: {
 			rejectionReason,
 		},
+	});
+}
+
+export async function getAdminDonationRequestDetails(
+	requestId: string,
+) {
+	return api(`/api/admin/donation-requests/${requestId}`, {
+		method: "GET",
 	});
 }
