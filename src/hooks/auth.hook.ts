@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { forgotPassword, getMeAction, googleLoginAction, loginAction, refreshTokenAction, registerUser, resetPassword, verifyEmail } from "@/api";
 import { logoutAction } from "@/app/(authGroup)/_actions/authActions";
 
@@ -33,12 +33,13 @@ export function useResetPassword() {
 }
 
 
-export function useGetMeAction() {
-  return useMutation({
-    mutationFn:getMeAction,
+export function useGetMe() {
+  return useQuery({
+    queryKey: ["user"],
+    queryFn: getMeAction,
+    retry: false,
   });
 }
-
 export function useGoogleLoginAction() {
   return useMutation({
     mutationFn:googleLoginAction,
