@@ -118,21 +118,25 @@ setIsSSLLoading(false)	}
           disabled={isBkashLoading || isSSLLoading}        />
       </div>
 
-     <button
-  type="button"
-  onClick={handleBkashDonate}
-  disabled={isBkashLoading || isSSLLoading}
->
-  {isBkashLoading ? "Processing..." : "Pay with bKash"}
-</button>
+<div className="mt-4 grid gap-3 sm:grid-cols-2">
+  <button
+    type="button"
+    onClick={handleBkashDonate}
+    disabled={isBkashLoading || isSSLLoading}
+    className="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    {isBkashLoading ? "Processing..." : "Pay with bKash"}
+  </button>
 
-<button
-  type="button"
-  onClick={handleSSLCommerzDonate}
-  disabled={isBkashLoading || isSSLLoading}
->
-  {isSSLLoading ? "Processing..." : "Pay with SSLCommerz"}
-</button>
+  <button
+    type="button"
+    onClick={handleSSLCommerzDonate}
+    disabled={isBkashLoading || isSSLLoading}
+    className="rounded-lg border px-4 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    {isSSLLoading ? "Processing..." : "Pay with SSLCommerz"}
+  </button>
+</div>
     <p className="mt-2 text-sm text-muted-foreground">
   You will be redirected to a secure payment gateway.
 </p>
