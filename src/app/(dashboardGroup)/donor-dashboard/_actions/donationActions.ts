@@ -24,3 +24,11 @@ export async function getMyDonation(): Promise<MyDonationsResponse> {
 		method: "GET",
 	});
 }
+
+export async function createSSLCommerzPayment(
+  donationId: string,
+) {
+  return api(`/api/payment/sslcommerz/create/${donationId}`, {
+    method: "POST",
+  });
+}

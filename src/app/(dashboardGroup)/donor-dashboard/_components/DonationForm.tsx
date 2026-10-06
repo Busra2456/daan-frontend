@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   createDonation,
   createPayment,
+  createSSLCommerzPayment,
 } from "../_actions/donationActions";
 import { CreateDonationZodSchema } from "@/validation";
 import { DonationFormProps } from "@/types/donation-request.type";
@@ -20,7 +21,7 @@ export default function DonationForm({
   const [amount, setAmount] = useState(requiredAmount);
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleDonate() {
+  async function handleBkashDonate() {
     const donationAmount = Number(amount);
 
     const validationResult = CreateDonationZodSchema.safeParse({
@@ -57,6 +58,44 @@ if (!validationResult.success) {
     }
   }
 
+  async function handleSSLCommerzDonate() {
+	const donationAmount = Number(amount);
+
+	const validationResult = CreateDonationZodSchema.safeParse({
+		amount: donationAmount,
+	});
+
+	if (!validationResult.success) {
+		toast.error(validationResult.error.issues[0]?.message);
+		return;
+	}
+
+	try {
+		setIsLoading(true);
+
+		const donationResponse = await createDonation({
+			amount: donationAmount,
+			requestId,
+		});
+
+		const donationId = donationResponse.data.id;
+
+		const paymentResponse =
+			await createSSLCommerzPayment(donationId);
+
+		window.location.href =
+			paymentResponse.data.sslcommerzURL;
+	} catch (error) {
+		console.error(error);
+
+		toast.error(
+			"Unable to start SSLCommerz payment. Please try again.",
+		);
+	} finally {
+		setIsLoading(false);
+	}
+}
+
   return (
     <div className="mt-6 border-t pt-5">
       <label
@@ -81,15 +120,25 @@ if (!validationResult.success) {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={handleDonate}
-        disabled={isLoading}
-        className="mt-4 w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {isLoading ? "Processing..." : "Donate Now"}
-      </button>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+  <button
+    type="button"
+    onClick={handleBkashDonate}
+    disabled={isLoading}
+    className="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+  >
+    {isLoading ? "Processing..." : "Pay with bKash"}
+  </button>
 
+  <button
+    type="button"
+    onClick={handleSSLCommerzDonate}
+    disabled={isLoading}
+    className="rounded-lg border px-4 py-3 text-sm font-semibold disabled:opacity-50"
+  >
+    {isLoading ? "Processing..." : "Pay with SSLCommerz"}
+  </button>
+</div>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         You will be redirected to secure bKash payment.
       </p>
