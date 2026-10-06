@@ -139,9 +139,9 @@ if (!validationResult.success) {
     {isLoading ? "Processing..." : "Pay with SSLCommerz"}
   </button>
 </div>
-      <p className="mt-3 text-center text-xs text-muted-foreground">
-        You will be redirected to secure bKash payment.
-      </p>
+    <p className="mt-2 text-sm text-muted-foreground">
+  You will be redirected to a secure payment gateway.
+</p>
     </div>
   );
 }
