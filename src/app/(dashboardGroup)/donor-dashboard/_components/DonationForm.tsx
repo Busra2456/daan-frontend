@@ -19,7 +19,8 @@ export default function DonationForm({
   requiredAmount,
 }: DonationFormProps) {
   const [amount, setAmount] = useState(requiredAmount);
-  const [isLoading, setIsLoading] = useState(false);
+const [isBkashLoading, setIsBkashLoading] = useState(false);
+const [isSSLLoading, setIsSSLLoading] = useState(false);
 
   async function handleBkashDonate() {
     const donationAmount = Number(amount);
@@ -35,7 +36,7 @@ if (!validationResult.success) {
 
 
     try {
-      setIsLoading(true);
+      setIsBkashLoading(true);
 
       const donationResponse = await createDonation({
         amount: donationAmount,
@@ -54,7 +55,7 @@ if (!validationResult.success) {
         "Unable to start the payment. Please try again.",
       );
     } finally {
-      setIsLoading(false);
+      setIsBkashLoading(false);
     }
   }
 
@@ -71,8 +72,7 @@ if (!validationResult.success) {
 	}
 
 	try {
-		setIsLoading(true);
-
+setIsSSLLoading(true);
 		const donationResponse = await createDonation({
 			amount: donationAmount,
 			requestId,
@@ -92,8 +92,7 @@ if (!validationResult.success) {
 			"Unable to start SSLCommerz payment. Please try again.",
 		);
 	} finally {
-		setIsLoading(false);
-	}
+setIsSSLLoading(false)	}
 }
 
   return (
@@ -116,29 +115,24 @@ if (!validationResult.success) {
           onChange={(event) => setAmount(event.target.value)}
           className="w-full bg-transparent px-2 py-3 text-sm outline-none"
           placeholder="Enter amount"
-          disabled={isLoading}
-        />
+          disabled={isBkashLoading || isSSLLoading}        />
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-  <button
-    type="button"
-    onClick={handleBkashDonate}
-    disabled={isLoading}
-    className="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-  >
-    {isLoading ? "Processing..." : "Pay with bKash"}
-  </button>
+     <button
+  type="button"
+  onClick={handleBkashDonate}
+  disabled={isBkashLoading || isSSLLoading}
+>
+  {isBkashLoading ? "Processing..." : "Pay with bKash"}
+</button>
 
-  <button
-    type="button"
-    onClick={handleSSLCommerzDonate}
-    disabled={isLoading}
-    className="rounded-lg border px-4 py-3 text-sm font-semibold disabled:opacity-50"
-  >
-    {isLoading ? "Processing..." : "Pay with SSLCommerz"}
-  </button>
-</div>
+<button
+  type="button"
+  onClick={handleSSLCommerzDonate}
+  disabled={isBkashLoading || isSSLLoading}
+>
+  {isSSLLoading ? "Processing..." : "Pay with SSLCommerz"}
+</button>
     <p className="mt-2 text-sm text-muted-foreground">
   You will be redirected to a secure payment gateway.
 </p>
