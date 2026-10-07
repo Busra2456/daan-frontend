@@ -281,7 +281,7 @@ npm run build
 3 Live Demo
 Frontend
 
-## 📌 Project Submission Information
+##  Project Submission Information
 
 Project Name            : Daan — Donate with Trust
 
