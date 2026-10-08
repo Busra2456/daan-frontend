@@ -9,6 +9,7 @@ import {
   useUpdateUserStatus,
 } from "@/hooks";
 import type { AdminUser, UserRole } from "@/types/user.type";
+import Image from "next/image";
 
 function getRoleStyle(role: UserRole) {
   switch (role) {
@@ -177,7 +178,7 @@ export default function AdminUsersPage() {
               <div className="flex-1 p-6">
                 <div className="flex items-start gap-4">
                   {user.imageUrl ? (
-                    <img
+                    <Image
                       src={user.imageUrl}
                       alt={user.name}
                       className="h-14 w-14 rounded-full object-cover"
