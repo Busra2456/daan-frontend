@@ -294,7 +294,7 @@ Live Backend URL        : https://daan-7z6n.vercel.app
 
 Live Frontend URL       : https://daan-frontend.vercel.app
 
-API Documentation       : To be added
+API Documentation       : https://daan-7z6n.vercel.app/api-docs
 
 Demo Video              : To be added
 
