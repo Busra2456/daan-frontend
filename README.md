@@ -296,7 +296,7 @@ Live Frontend URL       : https://daan-frontend.vercel.app
 
 API Documentation       : https://daan-7z6n.vercel.app/api-docs
 
-Demo Video              : To be added
+Demo Video              : https://drive.google.com/file/d/1nvBbsPZdO0DRvUuvTwH5oSxJN54qDugH/view?usp=sharing
 
 Demo Admin Email : demo.admin@gmail.com
 
