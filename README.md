@@ -298,9 +298,7 @@ API Documentation       : https://daan-7z6n.vercel.app/api-docs
 
 Demo Video              : https://drive.google.com/file/d/1nvBbsPZdO0DRvUuvTwH5oSxJN54qDugH/view?usp=sharing
 
-Demo Admin Email : demo.admin@gmail.com
 
-Demo Admin Password : DemoAdmin123!
 # Demo Login
 
 Daan provides one-click demo login options for all three application roles:
