@@ -13,6 +13,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { getVerifiedDonationRequests } from "@/api";
+import Image from "next/image";
 
 type RequestItem = {
   id: string;
@@ -135,12 +136,9 @@ export default function FeaturedRequests() {
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
               Please check your connection and try again.
             </p>
-
-            {process.env.NODE_ENV === "development" && (
-              <p className="mt-3 break-words text-xs text-red-600">
-                Debug: {error instanceof Error ? error.message : String(error)}
-              </p>
-            )}
+<p className="mt-3 break-words text-xs text-red-600">
+  Error: {error instanceof Error ? error.message : String(error)}
+</p>
 
             <button
               type="button"
@@ -177,11 +175,13 @@ export default function FeaturedRequests() {
               >
                 <div className="relative h-52 overflow-hidden bg-emerald-50">
                   {request.needy?.imageUrl ? (
-                    <img
-                      src={request.needy.imageUrl}
-                      alt={request.needy?.name || "Person seeking support"}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+                    <Image
+  src={request.needy.imageUrl}
+  alt={request.needy.name || "Person seeking support"}
+  fill
+  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+  className="object-cover transition duration-500 group-hover:scale-105"
+/>
                   ) : (
                     <div className="flex h-full items-center justify-center bg-gradient-to-br from-emerald-100 to-slate-200">
                       <Heart className="h-14 w-14 text-emerald-700/60" />
