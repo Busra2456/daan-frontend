@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
+import { ImagePlus, X } from "lucide-react";import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,80 +18,113 @@ import {
 } from "@/validation";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import Image from "next/image";
+import { createDonationRequestAction } from "../_actions/donationRequestActions";
 
 export default function CreateRequestForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const form = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      requiredAmount: 0,
-      situationVideo: "",
-      situationAudio: "",
-    } satisfies CreateDonationRequestFormValues,
+  const [situationImage, setSituationImage] = useState<File | null>(null);
+const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    validators: {
-      onSubmit: CreateDonationRequestZodSchema,
-    },
+function handleImageChange(file: File | undefined) {
+  if (!file) return;
 
-    onSubmit: async ({ value }) => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/donation-requests`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              title: value.title,
-              description: value.description,
-              requiredAmount: value.requiredAmount,
-              ...(value.situationVideo && {
-                situationVideo: value.situationVideo,
-              }),
-              ...(value.situationAudio && {
-                situationAudio: value.situationAudio,
-              }),
-            }),
-          },
+  if (!file.type.startsWith("image/")) {
+    toast.add({
+      title: "Invalid file",
+      description: "Please select an image file.",
+      type: "error",
+    });
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    toast.add({
+      title: "Image too large",
+      description: "Please select an image under 5 MB.",
+      type: "error",
+    });
+    return;
+  }
+
+  if (imagePreview) URL.revokeObjectURL(imagePreview);
+
+  setSituationImage(file);
+  setImagePreview(URL.createObjectURL(file));
+}
+
+ 
+const form = useForm({
+  defaultValues: {
+    title: "",
+    description: "",
+    requiredAmount: 0,
+    situationVideo: "",
+    situationAudio: "",
+  } satisfies CreateDonationRequestFormValues,
+
+  validators: {
+    onSubmit: CreateDonationRequestZodSchema,
+  },
+
+  onSubmit: async ({ value }) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("title", value.title.trim());
+      formData.append("description", value.description.trim());
+      formData.append(
+        "requiredAmount",
+        String(value.requiredAmount),
+      );
+
+      if (value.situationVideo.trim()) {
+        formData.append(
+          "situationVideo",
+          value.situationVideo.trim(),
         );
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(
-            result.message || "Failed to create donation request",
-          );
-        }
-
-        toast.add({
-          title: "Request Created",
-          description:
-            "Your donation request has been submitted for verification.",
-          type: "success",
-        });
-
-        await queryClient.invalidateQueries({
-  queryKey: ["my-donation-requests"],
-});
-
-        router.push("/needy-dashboard");
-      } catch (error) {
-        toast.add({
-          title: "Request Failed",
-          description:
-            error instanceof Error
-              ? error.message
-              : "Something went wrong. Please try again.",
-          type: "error",
-        });
       }
-    },
-  });
+
+      if (value.situationAudio.trim()) {
+        formData.append(
+          "situationAudio",
+          value.situationAudio.trim(),
+        );
+      }
+
+      if (situationImage) {
+        formData.append("situationImage", situationImage);
+      }
+
+      await createDonationRequestAction(formData);
+
+      toast.add({
+        title: "Request Created",
+        description:
+          "Your request has been submitted for verification.",
+        type: "success",
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["my-donation-requests"],
+      });
+
+      router.push("/needy-dashboard");
+    } catch (error) {
+      toast.add({
+        title: "Request Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
+        type: "error",
+      });
+    }
+  },
+});
 
   return (
     <form
@@ -152,6 +185,74 @@ export default function CreateRequestForm() {
             </Field>
           )}
         </form.Field>
+
+        <Field>
+  <FieldLabel htmlFor="situationImage">
+    Situation Image
+    <span className="ml-2 text-muted-foreground">(Optional)</span>
+  </FieldLabel>
+
+  <label
+    htmlFor="situationImage"
+    className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition hover:bg-muted/50"
+  >
+    {imagePreview ? (
+      <div className="relative w-full max-w-md">
+        <Image
+          src={imagePreview}
+          alt="Situation image preview"
+          width={640}
+          height={400}
+          unoptimized
+          className="max-h-64 w-full rounded-lg object-contain"
+        />
+        <span className="mt-3 block text-sm font-medium">
+          Change image
+        </span>
+      </div>
+    ) : (
+      <>
+        <ImagePlus className="mb-3 h-10 w-10 text-muted-foreground" />
+        <span className="font-medium">Upload situation image</span>
+        <span className="mt-1 text-sm text-muted-foreground">
+          JPG, PNG or WebP · Maximum 5 MB
+        </span>
+      </>
+    )}
+  </label>
+
+  <input
+    id="situationImage"
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    className="sr-only"
+    onChange={(event) => handleImageChange(event.target.files?.[0])}
+  />
+
+  {situationImage && (
+    <div className="mt-2 flex items-center justify-between gap-3 text-sm">
+      <span className="truncate">{situationImage.name}</span>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          if (imagePreview) URL.revokeObjectURL(imagePreview);
+          setSituationImage(null);
+          setImagePreview(null);
+
+          const input = document.getElementById(
+            "situationImage",
+          ) as HTMLInputElement | null;
+          if (input) input.value = "";
+        }}
+      >
+        <X className="mr-1 h-4 w-4" />
+        Remove
+      </Button>
+    </div>
+  )}
+</Field>
 
         <form.Field name="requiredAmount">
           {(field) => (
