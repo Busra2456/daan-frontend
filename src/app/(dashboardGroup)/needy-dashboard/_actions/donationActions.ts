@@ -1,6 +1,14 @@
 import { api } from "@/lib/api/client";
 import { ReceivedDonationsResponse, UpdateDonationRequestPayload } from "@/types/donation-request.type";
 
+
+export async function createDonationRequest(formData: FormData) {
+  return api("/api/donation-requests", {
+    method: "POST",
+    body: formData,
+  });
+}
+
 export async function getMyDonationRequests() {
   return api("/api/donation-requests/my-requests", {
     method: "GET",

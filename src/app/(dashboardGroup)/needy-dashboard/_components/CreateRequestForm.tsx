@@ -20,7 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Image from "next/image";
-import { createDonationRequestAction } from "../_actions/donationRequestActions";
+
+import { createDonationRequest } from "../_actions/donationActions";
 
 export default function CreateRequestForm() {
   const router = useRouter();
@@ -99,7 +100,7 @@ const form = useForm({
         formData.append("situationImage", situationImage);
       }
 
-      await createDonationRequestAction(formData);
+      await createDonationRequest(formData);
 
       toast.add({
         title: "Request Created",

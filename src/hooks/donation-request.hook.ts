@@ -1,6 +1,8 @@
-import { deleteDonationRequest, getDonationRequestById, getMyDonationRequests, updateDonationRequest } from "@/api";
+import { createDonationRequest, deleteDonationRequest, getDonationRequestById, getMyDonationRequests, updateDonationRequest } from "@/api";
+
+
 import { UpdateDonationRequestInput } from "@/types/donation-request.type";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useMyDonationRequests() {
   return useQuery({
@@ -17,6 +19,18 @@ export function useDonationRequestById(requestId: string) {
   });
 }
 
+export function useCreateDonationRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createDonationRequest,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["my-donation-requests"],
+      });
+    },
+  });
+}
 
 export function useUpdateDonationRequest() {
   return useMutation({

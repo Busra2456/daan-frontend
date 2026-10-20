@@ -16,7 +16,8 @@ export {
    getDonationRequestById,
    getReceivedDonations,
    updateDonationRequest,
-   deleteDonationRequest
+   deleteDonationRequest,
+   createDonationRequest
 } from "../app/(dashboardGroup)/needy-dashboard/_actions/donationActions";
 
 export {
