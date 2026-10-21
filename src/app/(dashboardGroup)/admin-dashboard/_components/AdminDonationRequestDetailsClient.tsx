@@ -26,6 +26,7 @@ import {
   useVerifyDonationRequest,
 } from "@/hooks";
 import { AdminDonationRequestDetailsClientProps } from "@/types/admin.type";
+import Image from "next/image";
 
 export default function AdminDonationRequestDetailsClient({
   requestId,
@@ -375,11 +376,37 @@ export default function AdminDonationRequestDetailsClient({
                 </div>
               ) : null}
 
-              {!request.situationVideo && !request.situationAudio && (
+              {/* Situation Image */}
+{request.situationImage && (
+  <div className="mt-5">
+    <p className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
+      Situation Image
+    </p>
+
+    <a
+      href={request.situationImage}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
+    >
+      <Image
+  src={request.situationImage}
+  alt="Donation request situation evidence"
+  width={1200}
+  height={800}
+  className="max-h-[450px] w-full bg-slate-100 object-contain dark:bg-slate-950"
+/>
+    </a>
+  </div>
+)}
+
+              {!request.situationVideo &&
+  !request.situationAudio &&
+  !request.situationImage && (
                 <div className="mt-5 flex items-start gap-3 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
                   <CircleAlert className="mt-0.5 size-5 shrink-0 text-slate-500 dark:text-slate-400" />
                   <p className={mutedTextClass}>
-                    No video or audio evidence was provided for this request.
+                    No video, audio, or image evidence was provided for this request.
                   </p>
                 </div>
               )}
