@@ -11,6 +11,7 @@ import {
 	useVerifyDonationRequest,
 } from "@/hooks";
 import { FaMinus } from "react-icons/fa";
+import Image from "next/image";
 
 export default function AdminDashboardPage() {
 	const queryClient = useQueryClient();
@@ -193,6 +194,17 @@ export default function AdminDashboardPage() {
 							>
 								{/* Request Information */}
 								<div className="flex-1 p-6">
+									 {request.situationImage && (
+									    <div className="relative h-48 w-full shrink-0 overflow-hidden rounded-lg sm:w-56">
+										<Image
+										  src={request.situationImage}
+										  alt={request.title}
+										  fill
+										  sizes="(max-width: 640px) 100vw, 224px"
+										  className="object-cover"
+										/>
+									    </div>
+									  )}
 									<div className="flex items-start justify-between gap-4">
 										<h2 className="line-clamp-2 text-xl font-semibold tracking-tight">
 											{request.title}

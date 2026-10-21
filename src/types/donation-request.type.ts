@@ -83,6 +83,8 @@ export interface PendingDonationRequest {
   reviewedById: string | null;
   createdAt: string;
   updatedAt: string;
+  situationImage?: string | null;
+
   needy: {
     id: string;
     name: string;

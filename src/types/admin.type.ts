@@ -36,6 +36,8 @@ export interface DonationRequest {
 	reviewedById: string | null;
 	createdAt: string;
 	updatedAt: string;
+	  situationImage?: string | null;
+
 
 	needy: {
 		id: string;
