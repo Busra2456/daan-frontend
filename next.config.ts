@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "6mb",
     },
   },
+  images: {
+remotePatterns: [
+{
+protocol: "https",
+hostname: "res.cloudinary.com",
+pathname: "/ajpmhsdi/**",
+},
+],
+},
 };
 
 export default nextConfig;
