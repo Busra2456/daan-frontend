@@ -205,7 +205,7 @@ export default function AdminDashboardPage() {
 										/>
 									    </div>
 									  )}
-									<div className="flex items-start justify-between gap-4">
+									<div className="flex flex-col items-center justify-center gap-3 text-center">
 										<h2 className="line-clamp-2 text-xl font-semibold tracking-tight">
 											{request.title}
 										</h2>
@@ -215,47 +215,45 @@ export default function AdminDashboardPage() {
 										</span>
 									</div>
 
-									<p className="mt-4 line-clamp-3 text-sm leading-6 text-muted-foreground">
+									<p className="mt-4 line-clamp-3 text-sm leading-6 text-muted-foregroundmt-4 text-center text-sm leading-6 text-muted-foreground">
 										{request.description}
 									</p>
 
-									{/* Required Amount */}
-									<div className="mt-6 rounded-xl bg-muted/50 p-4">
-										<p className="text-xs font-medium text-muted-foreground">
-											Required Amount
-										</p>
+{/* Required Amount */}
+	<div className="mt-6 flex flex-col items-center rounded-xl bg-muted/50 p-4 text-center">
+  <p className="text-xs font-medium text-muted-foreground">
+    Required Amount
+  </p>
 
-										<div className="mt-1 flex items-center gap-1">
-											<TbCurrencyTaka className="text-2xl" />
+  <div className="mt-1 flex items-center justify-center gap-1">
+    <TbCurrencyTaka className="text-2xl" />
 
-											<span className="text-2xl font-bold">
-												{Number(
-													request.requiredAmount,
-												).toLocaleString()}
-											</span>
-										</div>
-									</div>
+    <span className="text-2xl font-bold">
+      {Number(request.requiredAmount).toLocaleString()}
+    </span>
+  </div>
+</div>
 
-									{/* Needy User */}
-									<div className="mt-5 border-t pt-5">
-										<p className="text-xs font-medium text-muted-foreground">
-											Requested by
-										</p>
+		{/* Needy User */}
+<div className="mt-5 border-t pt-5 text-center">
+  <p className="text-xs font-medium text-muted-foreground">
+    Requested by
+  </p>
 
-										<p className="mt-1 font-semibold">
-											{request.needy.name}
-										</p>
+  <p className="mt-1 font-semibold">
+    {request.needy.name}
+  </p>
 
-										{request.needy.address && (
-											<p className="mt-1 text-sm text-muted-foreground">
-												{request.needy.address}
-											</p>
-										)}
-									</div>
-								</div>
+  {request.needy.address && (
+    <p className="mt-1 text-sm text-muted-foreground">
+      {request.needy.address}
+    </p>
+  )}
+</div>
+</div>
 
 								{/* Actions */}
-								<div className="border-t bg-muted/20 p-5">
+								<div className="w-full border-t bg-muted/20 p-5 text-center">
 									{isRejecting ? (
 										/* Reject Form */
 										<div className="space-y-3">
