@@ -190,12 +190,12 @@ export default function AdminDashboardPage() {
 						return (
 							<article
 								key={request.id}
-								className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+								className="group flex flex-col items-center overflow-hidden rounded-2xl border bg-card text-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
 							>
 								{/* Request Information */}
-								<div className="flex-1 p-6">
+								<div className=" w-full flex-1 p-6 text-center">
 									 {request.situationImage && (
-									    <div className="relative h-48 w-full shrink-0 overflow-hidden rounded-lg sm:w-56">
+									    <div className="relative mx-auto mb-5 h-48 w-full max-w-sm overflow-hidden rounded-xl">
 										<Image
 										  src={request.situationImage}
 										  alt={request.title}
