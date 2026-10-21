@@ -5,7 +5,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { FaMinus } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaMinus,
+  FaSpinner,
+  FaUsers,
+} from "react-icons/fa";
 import { TbCurrencyTaka } from "react-icons/tb";
 
 import {
@@ -24,6 +29,7 @@ export default function AdminDashboardPage() {
 
   const [rejectingRequestId, setRejectingRequestId] =
     useState<string | null>(null);
+
   const [rejectionReason, setRejectionReason] = useState("");
 
   const requests = data?.data ?? [];
@@ -34,6 +40,7 @@ export default function AdminDashboardPage() {
         queryClient.invalidateQueries({
           queryKey: ["pending-donation-requests"],
         });
+
         queryClient.invalidateQueries({
           queryKey: ["admin-all-donation-requests"],
         });
@@ -59,6 +66,7 @@ export default function AdminDashboardPage() {
           queryClient.invalidateQueries({
             queryKey: ["pending-donation-requests"],
           });
+
           queryClient.invalidateQueries({
             queryKey: ["admin-all-donation-requests"],
           });
@@ -67,323 +75,366 @@ export default function AdminDashboardPage() {
     );
   }
 
+  // Loading state
   if (isLoading) {
     return (
-      <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 space-y-3">
-          <div className="h-4 w-28 animate-pulse rounded-full bg-muted" />
-          <div className="h-9 w-64 max-w-full animate-pulse rounded-lg bg-muted" />
-          <div className="h-5 w-80 max-w-full animate-pulse rounded-lg bg-muted" />
-        </div>
+      <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 space-y-3">
+            <div className="h-9 w-64 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
+            <div className="h-5 w-full max-w-md animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
+          </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-2xl border bg-card"
-            >
-              <div className="aspect-[4/3] animate-pulse bg-muted" />
-              <div className="space-y-4 p-5">
-                <div className="h-5 animate-pulse rounded bg-muted" />
-                <div className="h-4 animate-pulse rounded bg-muted" />
-                <div className="h-20 animate-pulse rounded-xl bg-muted" />
-                <div className="h-10 animate-pulse rounded-xl bg-muted" />
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+              >
+                <div className="aspect-[16/9] animate-pulse bg-slate-200 dark:bg-slate-800" />
+                <div className="space-y-4 p-5">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-4 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-10 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </main>
     );
   }
 
+  // Error state
   if (isError) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div
-          role="alert"
-          className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center"
-        >
-          <h2 className="text-lg font-semibold">
+      <main className="min-h-screen bg-slate-50 px-4 py-8 dark:bg-slate-950 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-2xl border border-rose-200 bg-white p-6 dark:border-rose-900 dark:bg-slate-900">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
             Unable to load donation requests
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Something went wrong while loading pending requests. Please refresh
-            the page and try again.
+
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            Something went wrong while loading pending requests. Please try
+            refreshing the page.
           </p>
+
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+          >
+            Try again
+          </button>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
-      {/* Dashboard Header */}
-      <header className="mb-8 rounded-2xl border bg-card p-5 shadow-sm sm:p-7">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-          <div className="min-w-0">
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-              <span className="size-2 rounded-full bg-primary" />
-              Admin Control
-            </span>
-
-            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-              Admin Dashboard
-            </h1>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              Review donation requests, verify supporting information, and help
-              connect people in need with trusted donors.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-muted/40 px-4 py-3 text-sm font-semibold">
-              <FaMinus className="size-3 text-primary" />
-              <span>Pending Requests</span>
-              <span className="inline-flex min-w-7 items-center justify-center rounded-lg bg-primary px-2 py-1 text-xs font-bold text-primary-foreground">
-                {requests.length}
-              </span>
-            </div>
-
-            <Link
-              href="/admin-dashboard/donation-requests"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              View All Requests
-            </Link>
-
-            <Link
-              href="/admin-dashboard/users"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border bg-background px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              Manage Users
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Empty State */}
-      {requests.length === 0 ? (
-        <section className="rounded-2xl border bg-card px-6 py-16 text-center shadow-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/10 text-3xl text-primary">
-            ✓
-          </div>
-
-          <h2 className="mt-5 text-xl font-semibold">
-            No pending requests
-          </h2>
-
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-            There are currently no donation requests waiting for verification.
-          </p>
-
-          <Link
-            href="/admin-dashboard/donation-requests"
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            View All Requests
-          </Link>
-        </section>
-      ) : (
-        /* Request Cards */
-        <section>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        {/* Dashboard header */}
+        <header className="mb-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-xl font-bold tracking-tight">
-                Pending Verification
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Review each request before making a decision.
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                <FaCheckCircle />
+                ADMIN CONTROL
+              </span>
+
+              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                Admin Dashboard
+              </h1>
+
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+                Review donation requests, verify genuine needs, and help
+                donors make informed decisions.
               </p>
             </div>
 
-            <span className="rounded-full border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
-              {requests.length}{" "}
-              {requests.length === 1 ? "request" : "requests"}
-            </span>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/admin-dashboard/donation-requests"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800 hover:shadow-md dark:bg-emerald-600 dark:hover:bg-emerald-500"
+              >
+                View All Requests
+              </Link>
+
+              <Link
+                href="/admin-dashboard/users"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                <FaUsers />
+                Manage Users
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        {/* Pending summary */}
+        <section className="mb-8 grid gap-5 sm:grid-cols-2">
+          <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-xl text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              <FaMinus />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Pending Requests
+              </p>
+              <p className="mt-1 text-3xl font-bold">{requests.length}</p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-xl text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              <FaCheckCircle />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Review Queue
+              </p>
+              <p className="mt-1 text-sm font-semibold">
+                {requests.length > 0
+                  ? "Requests awaiting review"
+                  : "No requests awaiting review"}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Request section heading */}
+        <div className="mb-5">
+          <h2 className="text-xl font-bold sm:text-2xl">
+            Donation Requests
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">
+            Review the information before verifying or rejecting a request.
+          </p>
+        </div>
+
+        {/* Empty state */}
+        {requests.length === 0 ? (
+          <section className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-emerald-100 text-2xl text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              <FaCheckCircle />
+            </div>
+
+            <h2 className="mt-5 text-xl font-bold">
+              No pending requests
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-600 dark:text-slate-400">
+              There are currently no donation requests waiting for
+              verification. New requests will appear here when available.
+            </p>
+
+            <Link
+              href="/admin-dashboard/donation-requests"
+              className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+            >
+              View All Requests
+            </Link>
+          </section>
+        ) : (
+          /* Pending request cards */
+          <section className="grid items-stretch gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {requests.map((request) => {
               const isRejecting = rejectingRequestId === request.id;
-              const isProcessing =
-                verifyMutation.isPending || rejectMutation.isPending;
 
               return (
                 <article
                   key={request.id}
-                  className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                  className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
                 >
-                  {/* Request Image */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                  {/* Image */}
+                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                     {request.situationImage ? (
                       <Image
                         src={request.situationImage}
-                        alt={`Situation image for ${request.title}`}
+                        alt={request.title || "Donation request"}
                         fill
-                        sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                        className="object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
-                        No situation image provided
+                      <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
+                        No situation image
                       </div>
                     )}
 
-                    <span className="absolute left-3 top-3 rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-semibold text-yellow-800 shadow-sm">
+                    <span className="absolute left-3 top-3 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                       Pending
                     </span>
                   </div>
 
-                  {/* Request Information */}
-                  <div className="flex flex-1 flex-col p-5 text-center">
-                    <h3 className="line-clamp-2 min-h-14 text-lg font-bold leading-7 tracking-tight">
+                  {/* Request information */}
+                  <div className="flex flex-1 flex-col p-5 sm:p-6">
+                    <h3 className="line-clamp-2 text-xl font-bold leading-7">
                       {request.title}
                     </h3>
 
-                    <p className="mt-3 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground">
+                    <p className="mt-3 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-slate-600 dark:text-slate-400">
                       {request.description}
                     </p>
 
-                    {/* Required Amount */}
-                    <div className="mt-5 rounded-xl border border-border/70 bg-muted/40 p-4">
-                      <p className="text-xs font-medium text-muted-foreground">
+                    {/* Amount */}
+                    <div className="mt-5 rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/50">
+                      <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                         Required Amount
                       </p>
 
-                      <div className="mt-1 flex items-center justify-center gap-1">
-                        <TbCurrencyTaka
-                          aria-hidden="true"
-                          className="size-6"
-                        />
-                        <span className="text-2xl font-bold tabular-nums">
-                          {Number(request.requiredAmount).toLocaleString()}
+                      <div className="mt-1 flex items-center gap-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                        <TbCurrencyTaka className="text-2xl" />
+                        <span>
+                          {Number(request.requiredAmount || 0).toLocaleString(
+                            "en-BD",
+                          )}
                         </span>
                       </div>
                     </div>
 
-                    {/* Needy User */}
-                    <div className="mt-5 border-t pt-4">
-                      <p className="text-xs font-medium text-muted-foreground">
+                    {/* Needy user */}
+                    <div className="mt-5 border-t border-slate-100 pt-5 dark:border-slate-800">
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         Requested by
                       </p>
 
-                      <p className="mt-1 break-words text-sm font-semibold">
-                        {request.needy.name}
+                      <p className="mt-1 break-words font-semibold">
+                        {request.needy?.name || "Name not available"}
                       </p>
 
-                      {request.needy.address && (
-                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                      {request.needy?.address && (
+                        <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                           {request.needy.address}
                         </p>
                       )}
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="mt-auto border-t bg-muted/20 p-4">
-                    {isRejecting ? (
-                      <form
-                        className="space-y-3"
-                        onSubmit={(event) => {
-                          event.preventDefault();
-                          handleReject(request.id);
-                        }}
-                      >
-                        <label
-                          htmlFor={`rejection-${request.id}`}
-                          className="block text-left text-sm font-semibold"
-                        >
-                          Rejection Reason
-                        </label>
+                    {/* Actions */}
+                    <div className="mt-auto pt-5">
+                      {isRejecting ? (
+                        <div className="space-y-3 rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900 dark:bg-rose-950/30">
+                          <label
+                            htmlFor={`rejection-${request.id}`}
+                            className="block text-sm font-semibold text-rose-800 dark:text-rose-300"
+                          >
+                            Rejection Reason
+                          </label>
 
-                        <textarea
-                          id={`rejection-${request.id}`}
-                          value={rejectionReason}
-                          onChange={(event) =>
-                            setRejectionReason(event.target.value)
-                          }
-                          placeholder="Explain why this request is being rejected..."
-                          rows={4}
-                          maxLength={1000}
-                          required
-                          disabled={rejectMutation.isPending}
-                          className="w-full resize-y rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-
-                        <p className="text-right text-xs text-muted-foreground">
-                          {rejectionReason.length}/1000
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            type="submit"
-                            disabled={
-                              rejectMutation.isPending ||
-                              !rejectionReason.trim()
+                          <textarea
+                            id={`rejection-${request.id}`}
+                            value={rejectionReason}
+                            onChange={(event) =>
+                              setRejectionReason(event.target.value)
                             }
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-destructive px-3 py-2.5 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {rejectMutation.isPending
-                              ? "Rejecting..."
-                              : "Confirm Reject"}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRejectingRequestId(null);
-                              setRejectionReason("");
-                            }}
+                            placeholder="Explain why this request is being rejected..."
+                            rows={4}
+                            maxLength={1000}
                             disabled={rejectMutation.isPending}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border bg-card px-3 py-2.5 text-sm font-semibold transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </form>
-                    ) : (
-                      <div className="space-y-2">
-                        <Link
-                          href={`/admin-dashboard/donation-requests/${request.id}`}
-                          className="inline-flex min-h-10 w-full items-center justify-center rounded-xl border bg-card px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        >
-                          View Details
-                        </Link>
+                            className="w-full resize-y rounded-xl border border-rose-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-rose-900"
+                          />
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            type="button"
-                            disabled={isProcessing}
-                            onClick={() => handleVerify(request.id)}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {verifyMutation.isPending
-                              ? "Verifying..."
-                              : "Verify"}
-                          </button>
+                          <p className="text-right text-xs text-slate-500 dark:text-slate-400">
+                            {rejectionReason.length}/1000
+                          </p>
 
-                          <button
-                            type="button"
-                            disabled={isProcessing}
-                            onClick={() => {
-                              setRejectingRequestId(request.id);
-                              setRejectionReason("");
-                            }}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border bg-card px-3 py-2.5 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Reject
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleReject(request.id)}
+                              disabled={
+                                rejectMutation.isPending ||
+                                !rejectionReason.trim()
+                              }
+                              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-rose-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {rejectMutation.isPending && (
+                                <FaSpinner className="animate-spin" />
+                              )}
+                              {rejectMutation.isPending
+                                ? "Rejecting..."
+                                : "Confirm Reject"}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRejectingRequestId(null);
+                                setRejectionReason("");
+                              }}
+                              disabled={rejectMutation.isPending}
+                              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="space-y-3">
+                          <Link
+                            href={`/admin-dashboard/donation-requests/${request.id}`}
+                            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                          >
+                            View Details
+                          </Link>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <button
+                              type="button"
+                              disabled={
+                                verifyMutation.isPending ||
+                                rejectMutation.isPending
+                              }
+                              onClick={() => handleVerify(request.id)}
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                            >
+                              {verifyMutation.isPending ? (
+                                <FaSpinner className="animate-spin" />
+                              ) : (
+                                <FaCheckCircle />
+                              )}
+                              {verifyMutation.isPending
+                                ? "Verifying..."
+                                : "Verify"}
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={
+                                verifyMutation.isPending ||
+                                rejectMutation.isPending
+                              }
+                              onClick={() => {
+                                setRejectingRequestId(request.id);
+                                setRejectionReason("");
+                              }}
+                              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-rose-600 px-3 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <FaMinus />
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </article>
               );
             })}
-          </div>
-        </section>
-      )}
+          </section>
+        )}
+
+        {/* Footer */}
+        <footer className="mt-10 border-t border-slate-200 pt-5 text-center dark:border-slate-800">
+          <p className="text-xs leading-6 text-slate-500 dark:text-slate-400">
+            Daan — Donate with Trust. Review requests carefully and treat every
+            person with dignity.
+          </p>
+        </footer>
+      </div>
     </main>
   );
 }
