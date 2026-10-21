@@ -13,6 +13,7 @@ import {
 import type {
   MyDonationRequestsResponse,
 } from "@/types/donation-request.type";
+import Image from "next/image";
 
 export default function NeedyDashboardPage() {
   const queryClient = useQueryClient();
@@ -198,6 +199,19 @@ export default function NeedyDashboardPage() {
                     className="rounded-xl border bg-card p-6"
                   >
                     <div className="flex flex-col justify-between gap-4 sm:flex-row">
+                     
+  {request.situationImage && (
+    <div className="relative h-48 w-full shrink-0 overflow-hidden rounded-lg sm:w-56">
+      <Image
+        src={request.situationImage}
+        alt={request.title}
+        fill
+        sizes="(max-width: 640px) 100vw, 224px"
+        className="object-cover"
+      />
+    </div>
+  )}
+
                       <div>
                         <h3 className="text-lg font-semibold">
                           {request.title}
