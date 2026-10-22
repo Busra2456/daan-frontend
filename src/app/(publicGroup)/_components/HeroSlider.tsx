@@ -29,7 +29,7 @@ const slides = [
     category: "FOOD & BASIC NEEDS",
     title: "No family should go hungry.",
     description:
-      "Support vulnerable families in Bangladesh and humanitarian crisis areas with food and essential supplies.",
+      "Support displaced families and vulnerable people who need food and essential supplies.",
     image:
       "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1800&q=85",
     icon: Utensils,
@@ -38,7 +38,7 @@ const slides = [
     category: "EDUCATION SUPPORT",
     title: "Every child deserves to learn.",
     description:
-      "Help children in underprivileged communities access books, school supplies, and education.",
+      "Help children in underprivileged communities access education and school supplies.",
     image:
       "https://images.unsplash.com/photo-1491013516836-7db643ee125a?auto=format&fit=crop&w=1800&q=85",
     icon: BookOpen,
@@ -47,7 +47,7 @@ const slides = [
     category: "FAMILY SUPPORT",
     title: "Stand beside families in need.",
     description:
-      "Support struggling families and displaced people facing poverty, hardship, and uncertainty.",
+      "Support struggling families facing poverty, displacement, and difficult circumstances.",
     image:
       "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1800&q=85",
     icon: HeartHandshake,
@@ -56,7 +56,7 @@ const slides = [
     category: "DONATE WITH TRUST",
     title: "A little help can make a difference.",
     description:
-      "Learn about people's needs and choose how you can help through Daan.",
+      "Understand people's needs and choose how you can support them through Daan.",
     image:
       "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=85",
     icon: Heart,
