@@ -11,8 +11,6 @@ export interface DonationRequest {
 	requiredAmount: string;
 	situationVideo: string | null;
 	situationAudio: string | null;
-    situationImage: string | null;
-
 	status: DonationRequestStatus;
 	rejectionReason: string | null;
 	reviewedAt: string | null;
@@ -20,6 +18,7 @@ export interface DonationRequest {
 	reviewedById: string | null;
 	createdAt: string;
 	updatedAt: string;
+  situationImage?: string | null;
 	needy: {
 		id: string;
 		name: string;
@@ -27,7 +26,6 @@ export interface DonationRequest {
 		phone: string | null;
 		address: string | null;
 		imageUrl: string | null;
-    situationImage?: string | null;
 	};
 }
 
@@ -59,8 +57,6 @@ export interface VerifiedDonationRequest {
   requiredAmount: string;
   situationVideo: string | null;
   situationAudio: string | null;
-    situationImage: string | null;
-
   status: "VERIFIED";
   createdAt: string;
   updatedAt: string;
@@ -80,7 +76,6 @@ export interface PendingDonationRequest {
   requiredAmount: string;
   situationVideo: string | null;
   situationAudio: string | null;
-  
   status: "PENDING";
   rejectionReason: string | null;
   reviewedAt: string | null;
@@ -174,8 +169,6 @@ export interface MyDonation {
 		status: string;
 		situationVideo: string | null;
 		situationAudio: string | null;
-      situationImage: string | null;
-
 	};
 }
 
@@ -192,8 +185,6 @@ export interface UpdateDonationRequestPayload {
   requiredAmount?: number;
   situationVideo?: string;
   situationAudio?: string;
-    situationImage: string | null;
-
 }
 
 
