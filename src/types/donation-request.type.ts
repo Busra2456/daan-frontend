@@ -57,6 +57,8 @@ export interface VerifiedDonationRequest {
   requiredAmount: string;
   situationVideo: string | null;
   situationAudio: string | null;
+  situationImage?: string | null;
+
   status: "VERIFIED";
   createdAt: string;
   updatedAt: string;
