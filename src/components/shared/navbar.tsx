@@ -110,10 +110,10 @@ export function Navbar() {
           <Link
             href={dashboardUrl}
             className={
-              mobile
-                ? "flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-emerald-900/10 bg-white px-4 text-sm font-bold text-[#145c40] hover:bg-emerald-50"
-                : "flex min-h-[46px] items-center gap-2 rounded-full px-4 text-sm font-bold text-[#145c40] transition hover:bg-emerald-50"
-            }
+  mobile
+    ? "flex h-[52px] items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-base font-bold text-emerald-900 transition hover:bg-emerald-100"
+    : "flex min-h-[50px] items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 text-base font-bold text-emerald-900 transition hover:border-emerald-300 hover:bg-emerald-100"
+}
           >
             <LayoutDashboard className="size-4" />
             Dashboard
@@ -124,10 +124,10 @@ export function Navbar() {
             onClick={handleLogout}
             disabled={isPending}
             className={
-              mobile
-                ? "flex h-[50px] items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                : "flex min-h-[46px] items-center gap-2 rounded-full border border-slate-200 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-            }
+  mobile
+    ? "flex h-[52px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 text-base font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+    : "flex min-h-[50px] items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 text-base font-bold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 disabled:opacity-50"
+}
           >
             <LogOut className="size-4" />
             {isPending ? "Logging out..." : "Logout"}
