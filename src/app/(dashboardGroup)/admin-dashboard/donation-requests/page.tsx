@@ -10,7 +10,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { TbCurrencyTaka } from "react-icons/tb";
-
+import Image from "next/image";
+import { ImageOff } from "lucide-react";
 import { useAllDonationRequests } from "@/hooks";
 import {
   donationRequestSections,
@@ -268,6 +269,25 @@ export default function AllDonationRequestsPage() {
                         key={request.id}
                         className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
                       >
+				{/* Request Situation Image */}
+<div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+  {request.situationImage ? (
+    <Image
+      src={request.situationImage}
+      alt={`Situation photo for ${request.title}`}
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      className="object-cover transition-transform duration-300 hover:scale-105"
+    />
+  ) : (
+    <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500">
+      <ImageOff className="size-9" />
+      <span className="text-xs">
+        No situation image uploaded
+      </span>
+    </div>
+  )}
+</div>
                         <div className="flex-1 p-5 sm:p-6">
                           <div className="flex items-start justify-between gap-3">
                             <h3 className="line-clamp-2 min-w-0 text-lg font-semibold leading-7">

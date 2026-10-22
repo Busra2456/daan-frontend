@@ -29,6 +29,7 @@ export interface DonationRequest {
 	requiredAmount: string;
 	situationVideo: string | null;
 	situationAudio: string | null;
+	situationImage?: string | null;
 	status: DonationRequestStatus;
 	rejectionReason: string | null;
 	reviewedAt: string | null;
@@ -36,7 +37,6 @@ export interface DonationRequest {
 	reviewedById: string | null;
 	createdAt: string;
 	updatedAt: string;
-	  situationImage?: string | null;
 
 
 	needy: {
