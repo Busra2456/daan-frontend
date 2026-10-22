@@ -22,6 +22,9 @@ import OurMission from "./_components/OurMission";
 import HowItWorks from "./how-it-works/page";
 import AreasOfSupport from "./_components/AreasOfSupport";
 import ForDonors from "./_components/ForDonors";
+import ForNeedy from "./_components/ForNeedy";
+import OurPrinciples from "./_components/OurPrinciples";
+import VerificationNotice from "./_components/VerificationNotice";
 
 
 
@@ -97,109 +100,13 @@ export default function Home() {
       <ForDonors />
 
       {/* 8. For people seeking help */}
-      <section>
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-2 md:items-center lg:px-12 lg:py-24">
-          <div className="rounded-2xl border bg-muted/20 p-7 sm:p-10">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-              <HeartHandshake size={26} />
-            </div>
-
-            <p className="mt-5 text-sm font-semibold text-muted-foreground">
-              Your Story Deserves to Be Heard
-            </p>
-
-            <h3 className="mt-3 text-2xl font-bold">
-              Explain What You Need.
-            </h3>
-
-            <p className="mt-4 leading-7 text-muted-foreground">
-              Share relevant details about your circumstances and the
-              support you are seeking. Your request will follow the
-              platform&apos;s review process.
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              For People Seeking Help
-            </p>
-
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Ask for Support with Dignity.
-            </h2>
-
-            <p className="mt-5 leading-8 text-muted-foreground">
-              Create an account to submit a request and follow its progress.
-              Share accurate information and upload only media you have
-              permission to share.
-            </p>
-
-            <Link
-              href="/register"
-              className="mt-7 inline-flex items-center gap-2 rounded-xl border px-5 py-3 font-semibold transition hover:bg-muted"
-            >
-              Create an Account <ArrowRight size={17} />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <ForNeedy />
 
       {/* 9. Values */}
-      <section className="bg-muted/30">
-        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12 lg:py-24">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              Our Principles
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Built Around Respect and Responsibility.
-            </h2>
-          </div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {values.map((value) => (
-              <article
-                key={value.title}
-                className="rounded-2xl border bg-background p-6 transition hover:shadow-md"
-              >
-                <h3 className="text-lg font-semibold">{value.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  {value.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+     <OurPrinciples />
 
       {/* 10. Verification and safety */}
-      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
-        <div className="rounded-2xl border bg-background p-7 sm:p-10 lg:flex lg:items-center lg:justify-between lg:gap-12">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              <ShieldCheck size={17} />
-              A Careful Process
-            </div>
-
-            <h2 className="mt-3 text-2xl font-bold sm:text-3xl">
-              Verification Helps Donors Make Informed Choices.
-            </h2>
-
-            <p className="mt-4 leading-7 text-muted-foreground">
-              A verified status reflects the platform&apos;s review process.
-              It does not guarantee every claim or outcome. Read the
-              available details carefully before making a decision.
-            </p>
-          </div>
-
-          <Link
-            href="/how-it-works"
-            className="mt-7 inline-flex shrink-0 items-center gap-2 rounded-xl border px-5 py-3 font-semibold transition hover:bg-muted lg:mt-0"
-          >
-            How It Works <ArrowRight size={17} />
-          </Link>
-        </div>
-      </section>
+     <VerificationNotice />
 
       {/* 11. Community and shared purpose */}
       <section className="border-y bg-emerald-950 text-white">
