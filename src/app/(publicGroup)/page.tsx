@@ -19,53 +19,11 @@ import HeroSlider from "./_components/HeroSlider";
 import FeaturedRequests from "./_components/FeaturedRequests";
 import WhyDaan from "./_components/withTrust";
 import OurMission from "./_components/OurMission";
-const steps = [
-  {
-    number: "01",
-    title: "Share Your Situation",
-    description:
-      "Create an account and explain your circumstances and the support you need.",
-  },
-  {
-    number: "02",
-    title: "Review and Verification",
-    description:
-      "An administrator reviews the submitted information and determines the request status.",
-  },
-  {
-    number: "03",
-    title: "Give with Understanding",
-    description:
-      "Donors explore verified requests, review the available details, and decide whether to contribute.",
-  },
-];
+import HowItWorks from "./how-it-works/page";
+import AreasOfSupport from "./_components/AreasOfSupport";
+import ForDonors from "./_components/ForDonors";
 
-const categories = [
-  {
-    title: "Medical Support",
-    description:
-      "Help people seeking support for treatment and essential medical needs.",
-    icon: HeartPulse,
-  },
-  {
-    title: "Education",
-    description:
-      "Support learning materials, school expenses, and educational needs.",
-    icon: BookOpen,
-  },
-  {
-    title: "Food & Essentials",
-    description:
-      "Discover requests for food and everyday necessities.",
-    icon: Utensils,
-  },
-  {
-    title: "Shelter & Housing",
-    description:
-      "Explore requests involving essential living and housing needs.",
-    icon: House,
-  },
-];
+
 
 const values = [
   {
@@ -129,144 +87,14 @@ export default function Home() {
     <OurMission />
 
       {/* 5. How it works */}
-      <section className="bg-muted/30">
-        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12 lg:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              How It Works
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Three Steps Toward Meaningful Help.
-            </h2>
-          </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {steps.map((step) => (
-              <article
-                key={step.number}
-                className="rounded-2xl border bg-background p-7 transition hover:shadow-md"
-              >
-                <p className="text-sm font-bold tracking-widest text-emerald-700 dark:text-emerald-300">
-                  STEP {step.number}
-                </p>
-                <h3 className="mt-5 text-xl font-semibold">{step.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  {step.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
+ 
 
       {/* 6. Support categories */}
-      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12 lg:py-24">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              Areas of Support
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Different Needs. One Caring Community.
-            </h2>
-            <p className="mt-4 leading-7 text-muted-foreground">
-              Explore common areas where people may seek assistance.
-              Request availability depends on the information submitted
-              to Daan.
-            </p>
-          </div>
-
-          <Link
-            href="/requests"
-            className="inline-flex shrink-0 items-center gap-2 font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
-          >
-            Browse Requests <ArrowRight size={17} />
-          </Link>
-        </div>
-
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((category) => {
-            const Icon = category.icon;
-
-            return (
-              <article
-                key={category.title}
-                className="flex h-full flex-col rounded-2xl border bg-card p-6 transition duration-200 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                  <Icon size={25} />
-                </div>
-
-                <h3 className="mt-5 text-lg font-semibold">
-                  {category.title}
-                </h3>
-                <p className="mt-3 flex-1 text-sm leading-7 text-muted-foreground">
-                  {category.description}
-                </p>
-
-                <Link
-                  href="/requests"
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
-                >
-                  Explore Requests <ArrowRight size={15} />
-                </Link>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+     <AreasOfSupport />
 
       {/* 7. For donors */}
-      <section className="border-y bg-muted/20">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-2 md:items-center lg:px-12 lg:py-24">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              For Donors
-            </p>
-
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Find a Cause That Matters to You.
-            </h2>
-
-            <p className="mt-5 leading-8 text-muted-foreground">
-              Explore available requests, review their details and current
-              status, and decide whether you want to contribute. Choose
-              thoughtfully and use the information available to you.
-            </p>
-
-            <Link
-              href="/requests"
-              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
-            >
-              Browse Requests <ArrowRight size={17} />
-            </Link>
-          </div>
-
-          <div className="rounded-2xl border bg-background p-7 sm:p-10">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-              <ShieldCheck size={26} />
-            </div>
-
-            <h3 className="mt-5 text-xl font-bold">
-              Before You Contribute
-            </h3>
-
-            <div className="mt-6 space-y-5">
-              {[
-                "Read the request details",
-                "Check the verification status",
-                "Understand the intended support",
-                "Use the secure payment process",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-300" />
-                  <p className="text-sm font-medium leading-6">{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <ForDonors />
 
       {/* 8. For people seeking help */}
       <section>
