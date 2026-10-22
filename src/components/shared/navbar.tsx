@@ -111,8 +111,8 @@ export function Navbar() {
             href={dashboardUrl}
             className={
   mobile
-    ? "flex h-[52px] items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-base font-bold text-emerald-900 transition hover:bg-emerald-100"
-    : "flex min-h-[50px] items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 text-base font-bold text-emerald-900 transition hover:border-emerald-300 hover:bg-emerald-100"
+    ? "flex h-12 items-center justify-center gap-2 rounded-xl border border-[#dce8df] bg-white px-5 text-base font-semibold text-[#145c40] shadow-sm transition-all duration-200 hover:border-[#145c40] hover:bg-[#f4f8f5]"
+    : "flex min-h-12 items-center gap-2 rounded-full border border-[#dce8df] bg-white px-5 text-base font-semibold text-[#145c40] shadow-sm transition-all duration-200 hover:border-[#145c40] hover:bg-[#f4f8f5]"
 }
           >
             <LayoutDashboard className="size-4" />
@@ -123,10 +123,10 @@ export function Navbar() {
             type="button"
             onClick={handleLogout}
             disabled={isPending}
-            className={
+           className={
   mobile
-    ? "flex h-[52px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 text-base font-bold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
-    : "flex min-h-[50px] items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 text-base font-bold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 disabled:opacity-50"
+    ? "flex h-12 items-center justify-center gap-2 rounded-xl border border-[#e2e5e2] bg-white px-5 text-base font-semibold text-[#47534b] transition-all duration-200 hover:border-[#cbd2cc] hover:bg-[#f5f6f5] disabled:cursor-not-allowed disabled:opacity-50"
+    : "flex min-h-12 items-center gap-2 rounded-full border border-[#e2e5e2] bg-white px-5 text-base font-semibold text-[#47534b] transition-all duration-200 hover:border-[#cbd2cc] hover:bg-[#f5f6f5] disabled:cursor-not-allowed disabled:opacity-50"
 }
           >
             <LogOut className="size-4" />
