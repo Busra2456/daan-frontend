@@ -71,11 +71,11 @@ export default function ContactPage() {
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#C9DDCA] bg-white/80 px-4 py-2 text-sm font-semibold text-[#26734D] shadow-sm">
               <MessageCircle size={16} />
-              We&aposre Here to Help
+              We&apos;re Here to Help
             </div>
 
             <h1 className="max-w-3xl text-4xl leading-tight font-bold tracking-tight text-[#153D2C] sm:text-5xl md:text-6xl">
-              Let&apos make giving
+              Let&apos;s make giving
               <span className="mt-1 block text-[#278052]">
                 better together.
               </span>
@@ -161,7 +161,7 @@ export default function ContactPage() {
                   </p>
 
                   <p className="mt-1 text-sm leading-5 text-[#6A8070]">
-                    Learn about a person&apos situation before deciding to help.
+                    Learn about a person&apos;s situation before deciding to help.
                   </p>
                 </div>
               </div>
