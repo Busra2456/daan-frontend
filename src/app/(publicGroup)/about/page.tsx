@@ -224,7 +224,7 @@ export default function AboutPage() {
           <p className="mx-auto mt-4 max-w-2xl leading-7 text-muted-foreground">
             Whether you are looking for support or hoping to help
             someone, every meaningful connection starts with
-            understanding another person's needs.
+            understanding another person&apos needs.
           </p>
 
           <Link
