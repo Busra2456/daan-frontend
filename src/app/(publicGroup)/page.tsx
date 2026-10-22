@@ -17,31 +17,8 @@ import {
 
 import HeroSlider from "./_components/HeroSlider";
 import FeaturedRequests from "./_components/FeaturedRequests";
-
-const trustPoints = [
-  {
-    number: "01",
-    title: "Review Before Giving",
-    description:
-      "Administrators review requests before they are marked as verified.",
-    icon: ShieldCheck,
-  },
-  {
-    number: "02",
-    title: "Understand the Need",
-    description:
-      "Read the available details and supporting media before deciding to help.",
-    icon: HeartHandshake,
-  },
-  {
-    number: "03",
-    title: "Respect Every Story",
-    description:
-      "People can explain their circumstances in their own words and share supporting media.",
-    icon: Video,
-  },
-];
-
+import WhyDaan from "./_components/withTrust";
+import OurMission from "./_components/OurMission";
 const steps = [
   {
     number: "01",
@@ -146,92 +123,10 @@ export default function Home() {
       <FeaturedRequests />
 
       {/* 3. Trust points */}
-      <section className="border-y bg-muted/30">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-              Why Daan
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Giving Should Begin with Trust.
-            </h2>
-            <p className="mt-4 leading-7 text-muted-foreground">
-              A thoughtful review process helps people understand a request
-              before deciding how to support it.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {trustPoints.map((point) => {
-              const Icon = point.icon;
-
-              return (
-                <article
-                  key={point.number}
-                  className="rounded-2xl border bg-background p-6 transition duration-200 hover:-translate-y-1 hover:shadow-lg"
-                >
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                    <Icon size={24} aria-hidden="true" />
-                  </div>
-
-                  <p className="mt-6 text-xs font-semibold tracking-widest text-muted-foreground">
-                    {point.number}
-                  </p>
-
-                  <h3 className="mt-2 text-xl font-semibold">
-                    {point.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                    {point.description}
-                  </p>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+     <WhyDaan />
 
       {/* 4. Mission */}
-      <section className="mx-auto grid max-w-7xl gap-8 px-5 py-20 sm:px-8 lg:grid-cols-2 lg:items-center lg:px-12 lg:py-24">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
-            Our Mission
-          </p>
-
-          <h2 className="mt-3 max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">
-            Make Generosity More Personal.
-          </h2>
-
-          <p className="mt-5 leading-8 text-muted-foreground">
-            Everyone deserves dignity and an opportunity to be heard. Daan
-            aims to connect people seeking support with donors who want to
-            make thoughtful, informed decisions.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border bg-muted/20 p-7 sm:p-9">
-          <HeartHandshake
-            size={40}
-            className="text-emerald-700 dark:text-emerald-300"
-          />
-          <h3 className="mt-5 text-xl font-bold">
-            One platform. Two sides of kindness.
-          </h3>
-          <p className="mt-3 leading-7 text-muted-foreground">
-            People can explain their needs, while donors can explore
-            available information and choose how they want to help.
-          </p>
-
-          <Link
-            href="/about"
-            className="mt-5 inline-flex items-center gap-2 font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
-          >
-            Learn About Daan
-            <ArrowRight size={17} />
-          </Link>
-        </div>
-      </section>
+    <OurMission />
 
       {/* 5. How it works */}
       <section className="bg-muted/30">
