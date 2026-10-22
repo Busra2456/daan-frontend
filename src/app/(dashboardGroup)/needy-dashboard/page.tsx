@@ -1,8 +1,23 @@
-
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import {
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  FileText,
+  HeartHandshake,
+  LoaderCircle,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 import { TbCurrencyTaka } from "react-icons/tb";
 
 import {
@@ -10,18 +25,57 @@ import {
   getMyDonationRequests,
   getReceivedDonations,
 } from "@/api";
-import type {
-  MyDonationRequestsResponse,
-} from "@/types/donation-request.type";
-import Image from "next/image";
+import type { MyDonationRequestsResponse } from "@/types/donation-request.type";
+
+function getStatusStyles(status: string) {
+  switch (status.toUpperCase()) {
+    case "VERIFIED":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300";
+
+    case "PENDING":
+      return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300";
+
+    case "REJECTED":
+      return "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-300";
+
+    case "COMPLETED":
+      return "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-300";
+
+    case "DONATIONS":
+      return "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/50 dark:text-violet-300";
+
+    default:
+      return "border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300";
+  }
+}
+
+function formatDate(date: string) {
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Date unavailable";
+  }
+
+  return parsedDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export default function NeedyDashboardPage() {
   const queryClient = useQueryClient();
+  const [deletingRequestId, setDeletingRequestId] = useState<string | null>(
+    null,
+  );
+  const [deleteError, setDeleteError] = useState("");
 
   const {
     data,
     isLoading,
     isError,
+    refetch,
+    isFetching,
   } = useQuery<MyDonationRequestsResponse>({
     queryKey: ["my-donation-requests"],
     queryFn: getMyDonationRequests,
@@ -32,263 +86,385 @@ export default function NeedyDashboardPage() {
     queryFn: getReceivedDonations,
   });
 
-  const { mutateAsync: deleteRequest, isPending: isDeleting } =
-    useMutation({
-      mutationFn: deleteDonationRequest,
-    });
+  const { mutateAsync: deleteRequest, isPending: isDeleting } = useMutation({
+    mutationFn: deleteDonationRequest,
+  });
 
   const requests = data?.data ?? [];
 
   const totalRequests = requests.length;
-
   const pendingRequests = requests.filter(
     (request) => request.status === "PENDING",
   ).length;
-
   const verifiedRequests = requests.filter(
     (request) => request.status === "VERIFIED",
   ).length;
-
-  const totalReceived = receivedData?.data.totalReceived ?? 0;
+  const totalReceived = Number(receivedData?.data?.totalReceived ?? 0);
 
   const handleDelete = async (requestId: string) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this donation request?",
     );
 
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
+
+    setDeletingRequestId(requestId);
+    setDeleteError("");
 
     try {
       await deleteRequest(requestId);
 
-      await queryClient.invalidateQueries({
-        queryKey: ["my-donation-requests"],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["my-donation-requests"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["received-donations"],
+        }),
+      ]);
 
       window.alert("Donation request deleted successfully.");
     } catch (error) {
-      window.alert(
+      const message =
         error instanceof Error
           ? error.message
-          : "Failed to delete donation request.",
-      );
+          : "Failed to delete donation request.";
+
+      setDeleteError(message);
+    } finally {
+      setDeletingRequestId(null);
     }
   };
 
   return (
-    <main className="mx-auto max-w-7xl p-6">
-      {/* Header */}
-      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Needy Dashboard</h1>
+    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <section className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300">
+              <HeartHandshake className="size-4" />
+              Daan — Donate with Trust
+            </div>
 
-          <p className="mt-2 text-muted-foreground">
-            Manage your requests and connect with trusted donors.
-          </p>
-        </div>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Needy Dashboard
+            </h1>
 
-        <Link
-          href="/needy-dashboard/create-request"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        >
-          Create Request
-        </Link>
-      </div>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">
+              Manage your donation requests, track verification status, and
+              see the support you have received.
+            </p>
+          </div>
 
-      {/* Loading */}
-      {isLoading && (
-        <div className="rounded-lg border p-6">
-          <p className="text-muted-foreground">
-            Loading your requests...
-          </p>
-        </div>
-      )}
+          <Link
+            href="/needy-dashboard/create-request"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
+          >
+            <Plus className="size-4" />
+            Create Request
+          </Link>
+        </section>
 
-      {/* Error */}
-      {isError && (
-        <div className="rounded-lg border border-destructive/30 p-6">
-          <p className="text-destructive">
-            Failed to load your donation requests.
-          </p>
-        </div>
-      )}
-
-      {/* Dashboard */}
-      {!isLoading && !isError && (
-        <>
-          {/* Statistics */}
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">
+        {/* Statistics */}
+        <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                 Total Requests
               </p>
-
-              <p className="mt-2 text-3xl font-bold">
-                {totalRequests}
-              </p>
+              <div className="rounded-xl bg-slate-100 p-3 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                <FileText className="size-5" />
+              </div>
             </div>
+            <p className="mt-4 text-3xl font-bold tracking-tight">
+              {isLoading ? "—" : totalRequests}
+            </p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              All your submitted requests
+            </p>
+          </div>
 
-            <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">
-                Pending
+          <div className="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm dark:border-amber-900/70 dark:bg-slate-900 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Pending Review
               </p>
-
-              <p className="mt-2 text-3xl font-bold">
-                {pendingRequests}
-              </p>
+              <div className="rounded-xl bg-amber-50 p-3 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                <Clock3 className="size-5" />
+              </div>
             </div>
+            <p className="mt-4 text-3xl font-bold tracking-tight">
+              {isLoading ? "—" : pendingRequests}
+            </p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Waiting for admin verification
+            </p>
+          </div>
 
-            <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm dark:border-emerald-900/70 dark:bg-slate-900 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                 Verified
               </p>
-
-              <p className="mt-2 text-3xl font-bold">
-                {verifiedRequests}
-              </p>
+              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                <ShieldCheck className="size-5" />
+              </div>
             </div>
+            <p className="mt-4 text-3xl font-bold tracking-tight">
+              {isLoading ? "—" : verifiedRequests}
+            </p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Requests approved by the admin
+            </p>
+          </div>
 
-            <div className="rounded-xl border bg-card p-6">
-              <p className="text-sm text-muted-foreground">
-                Received
+          <div className="rounded-2xl border border-sky-200 bg-white p-5 shadow-sm dark:border-sky-900/70 dark:bg-slate-900 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Received Donations
               </p>
-
-              <p className="mt-2 flex items-center text-3xl font-bold">
-                <TbCurrencyTaka />
-                {totalReceived.toLocaleString()}
-              </p>
+              <div className="rounded-xl bg-sky-50 p-3 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300">
+                <Wallet className="size-5" />
+              </div>
             </div>
-          </section>
+            <p className="mt-4 flex items-center text-3xl font-bold tracking-tight">
+              <TbCurrencyTaka className="mr-1 size-7" />
+              {Number.isFinite(totalReceived)
+                ? totalReceived.toLocaleString("en-BD")
+                : "0"}
+            </p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Total donations received
+            </p>
+          </div>
+        </section>
 
-          {/* Recent Requests */}
-          <section className="mt-8">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold">
+        {/* Recent Requests */}
+        <section>
+          <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
                 Recent Requests
               </h2>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                Your latest donation requests will appear here.
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                Review your requests and follow their progress.
               </p>
             </div>
 
-            {/* Empty State */}
-            {requests.length === 0 ? (
-              <div className="rounded-xl border p-8 text-center">
-                <p className="font-medium">No requests yet</p>
-
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Create your first request and let donors know how
-                  they can help.
-                </p>
-
-                <Link
-                  href="/needy-dashboard/create-request"
-                  className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                >
-                  Create your first request
-                </Link>
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                {requests.map((request) => (
-                  <div
-                    key={request.id}
-                    className="rounded-xl border bg-card p-6"
-                  >
-                    <div className="flex flex-col justify-between gap-4 sm:flex-row">
-                     
-  {request.situationImage && (
-    <div className="relative h-48 w-full shrink-0 overflow-hidden rounded-lg sm:w-56">
-      <Image
-        src={request.situationImage}
-        alt={request.title}
-        fill
-        sizes="(max-width: 640px) 100vw, 224px"
-        className="object-cover"
-      />
-    </div>
-  )}
-
-                      <div>
-                        <h3 className="text-lg font-semibold">
-                          {request.title}
-                        </h3>
-
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {request.description}
-                        </p>
-                      </div>
-
-                      <div className="shrink-0">
-                        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium">
-                          {request.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex flex-col border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center">
-                        <TbCurrencyTaka className="text-2xl" />
-
-                        <p className="font-semibold">
-                          {Number(
-                            request.requiredAmount,
-                          ).toLocaleString()}
-                        </p>
-
-                        <p className="ml-2 text-sm text-muted-foreground">
-                          {new Date(
-                            request.createdAt,
-                          ).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-wrap items-center gap-3">
-                        {/* View Details */}
-                        <Link
-                          href={`/needy-dashboard/requests/${request.id}`}
-                          className="text-sm font-medium text-primary hover:underline"
-                        >
-                          View Details
-                        </Link>
-
-                        {/* Edit + Delete only for PENDING */}
-                        {request.status === "PENDING" && (
-                          <>
-                            <Link
-                              href={`/needy-dashboard/requests/${request.id}/edit`}
-                              className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted"
-                            >
-                              Edit
-                            </Link>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleDelete(request.id)
-                              }
-                              disabled={isDeleting}
-                              className="rounded-md border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {isDeleting
-                                ? "Deleting..."
-                                : "Delete"}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {!isLoading && !isError && requests.length > 0 && (
+              <span className="inline-flex w-fit items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                {requests.length} {requests.length === 1 ? "request" : "requests"}
+              </span>
             )}
-          </section>
-        </>
-      )}
+          </div>
+
+          {/* Delete Error */}
+          {deleteError && (
+            <div
+              role="alert"
+              className="mb-4 flex flex-col justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300 sm:flex-row sm:items-center"
+            >
+              <p>{deleteError}</p>
+              <button
+                type="button"
+                onClick={() => setDeleteError("")}
+                className="w-fit font-semibold underline underline-offset-4"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {/* Loading */}
+          {isLoading && (
+            <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
+              <LoaderCircle className="mb-3 size-8 animate-spin text-emerald-600" />
+              <p className="font-semibold">Loading your requests...</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Please wait while we fetch your information.
+              </p>
+            </div>
+          )}
+
+          {/* Error */}
+          {isError && (
+            <div
+              role="alert"
+              className="rounded-2xl border border-rose-200 bg-white p-8 text-center dark:border-rose-900 dark:bg-slate-900"
+            >
+              <p className="font-semibold text-rose-700 dark:text-rose-300">
+                Unable to load your donation requests.
+              </p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Check your connection or sign in again if your session has
+                expired.
+              </p>
+              <button
+                type="button"
+                onClick={() => void refetch()}
+                disabled={isFetching}
+                className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw
+                  className={`size-4 ${isFetching ? "animate-spin" : ""}`}
+                />
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Request List */}
+          {!isLoading && !isError && (
+            <>
+              {requests.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center dark:border-slate-700 dark:bg-slate-900">
+                  <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    <HeartHandshake className="size-7" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold">No requests yet</h3>
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-400">
+                    Share your situation by creating a donation request. Once
+                    submitted, you can track its verification status here.
+                  </p>
+                  <Link
+                    href="/needy-dashboard/create-request"
+                    className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  >
+                    <Plus className="size-4" />
+                    Create Your First Request
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid gap-5">
+                  {requests.map((request) => (
+                    <article
+                      key={request.id}
+                      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-900"
+                    >
+                      <div className="p-4 sm:p-6">
+                        <div className="flex flex-col gap-5 sm:flex-row">
+                          {/* Request Image */}
+                          {request.situationImage ? (
+                            <div className="relative h-52 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800 sm:h-40 sm:w-52">
+                              <Image
+                                src={request.situationImage}
+                                alt={`Situation image for ${request.title}`}
+                                fill
+                                sizes="(max-width: 640px) 100vw, 208px"
+                                className="object-cover transition duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex h-36 w-full shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 sm:h-40 sm:w-40">
+                              <HeartHandshake className="size-12" />
+                            </div>
+                          )}
+
+                          {/* Request Information */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <h3 className="break-words text-lg font-bold text-slate-900 dark:text-slate-100 sm:text-xl">
+                                {request.title}
+                              </h3>
+
+                              <span
+                                className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyles(request.status)}`}
+                              >
+                                {request.status.replaceAll("_", " ")}
+                              </span>
+                            </div>
+
+                            <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-slate-600 dark:text-slate-400">
+                              {request.description}
+                            </p>
+
+                            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                              <div className="inline-flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
+                                <TbCurrencyTaka className="size-5" />
+                                <span>
+                                  {Number.isFinite(
+                                    Number(request.requiredAmount),
+                                  )
+                                    ? Number(
+                                        request.requiredAmount,
+                                      ).toLocaleString("en-BD")
+                                    : "0"}
+                                </span>
+                              </div>
+
+                              <div className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                <CalendarDays className="size-4" />
+                                {formatDate(request.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                          <Link
+                            href={`/needy-dashboard/requests/${request.id}`}
+                            className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+                          >
+                            View Details
+                            <ArrowRight className="size-4" />
+                          </Link>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            {request.status === "PENDING" && (
+                              <>
+                                <Link
+                                  href={`/needy-dashboard/requests/${request.id}/edit`}
+                                  className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+                                >
+                                  Edit Request
+                                </Link>
+
+                                <button
+                                  type="button"
+                                  onClick={() => void handleDelete(request.id)}
+                                  disabled={isDeleting}
+                                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900 dark:text-rose-300 dark:hover:bg-rose-950/50"
+                                >
+                                  {isDeleting &&
+                                  deletingRequestId === request.id ? (
+                                    <LoaderCircle className="size-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="size-4" />
+                                  )}
+                                  {isDeleting &&
+                                  deletingRequestId === request.id
+                                    ? "Deleting..."
+                                    : "Delete"}
+                                </button>
+                              </>
+                            )}
+
+                            {request.status === "VERIFIED" && (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                                <CheckCircle2 className="size-4" />
+                                Verified by admin
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-10 border-t border-slate-200 py-5 text-center dark:border-slate-800">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Daan — Donate with Trust. Every genuine need deserves a chance.
+          </p>
+        </footer>
+      </div>
     </main>
   );
 }
