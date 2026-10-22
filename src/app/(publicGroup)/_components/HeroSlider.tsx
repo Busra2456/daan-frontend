@@ -16,51 +16,51 @@ import {
   Utensils,
 } from "lucide-react";
 const slides = [
-  {
-    category: "MEDICAL EMERGENCY",
-    title: "Your kindness can save a life.",
-    description:
-      "Help struggling patients get the medical treatment, medicine, and care they urgently need.",
-    image:
-      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1800&q=85",
-    icon: Stethoscope,
-  },
-  {
-    category: "FOOD & BASIC NEEDS",
-    title: "No family should go hungry.",
-    description:
-      "Support displaced families and vulnerable people who need food and essential supplies.",
-    image:
-      "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1800&q=85",
-    icon: Utensils,
-  },
-  {
-    category: "EDUCATION SUPPORT",
-    title: "Every child deserves to learn.",
-    description:
-      "Help children in underprivileged communities access education and school supplies.",
-    image:
-      "https://images.unsplash.com/photo-1491013516836-7db643ee125a?auto=format&fit=crop&w=1800&q=85",
-    icon: BookOpen,
-  },
-  {
-    category: "FAMILY SUPPORT",
-    title: "Stand beside families in need.",
-    description:
-      "Support struggling families facing poverty, displacement, and difficult circumstances.",
-    image:
-      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1800&q=85",
-    icon: HeartHandshake,
-  },
-  {
-    category: "DONATE WITH TRUST",
-    title: "A little help can make a difference.",
-    description:
-      "Understand people's needs and choose how you can support them through Daan.",
-    image:
-      "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=85",
-    icon: Heart,
-  },
+{
+category: "MEDICAL EMERGENCY",
+title: "Your kindness can save a life.",
+description:
+"Help struggling patients receive essential treatment, medicine, and compassionate care when they need it most.",
+image: "/images/medical-emergency.jpg",
+icon: Stethoscope,
+accent: "Medical care for everyone",
+},
+{
+category: "FOOD & BASIC NEEDS",
+title: "No family should go hungry.",
+description:
+"Help vulnerable families access nutritious food, clean essentials, and the daily necessities of life.",
+image: "/images/food-support.jpg",
+icon: Utensils,
+accent: "Food and essential support",
+},
+{
+category: "EDUCATION SUPPORT",
+title: "Every child deserves to learn.",
+description:
+"Give children hope for a brighter future through books, school supplies, and access to education.",
+image: "/images/education-support.jpg",
+icon: BookOpen,
+accent: "A brighter future for children",
+},
+{
+category: "FAMILY SUPPORT",
+title: "Stand beside families in need.",
+description:
+"Support families facing poverty, displacement, and unexpected hardships with dignity and care.",
+image: "/images/family-support.jpg",
+icon: HeartHandshake,
+accent: "Hope for families in hardship",
+},
+{
+category: "DONATE WITH TRUST",
+title: "A little help can make a difference.",
+description:
+"Understand real needs, explore requests, and make thoughtful giving decisions through Daan.",
+image: "/images/humanitarian-support.jpg",
+icon: Heart,
+accent: "Compassion with transparency",
+},
 ];
 export default function HeroSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
