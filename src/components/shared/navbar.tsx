@@ -16,34 +16,36 @@ const navLinks = [
   { name: "Home", href: "/" },
   { name: "How It Works", href: "/how-it-works" },
   { name: "Find a Cause", href: "/requests" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 border-b border-emerald-950/10 bg-white/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-[76px] w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-emerald-950/10 bg-white/95 shadow-sm backdrop-blur-xl">
+      <div className="mx-auto flex min-h-[88px] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link
           href="/"
           aria-label="Daan home"
-          className="group flex shrink-0 items-center gap-2.5"
+          className="group flex shrink-0 items-center gap-3"
         >
-          <div className="flex size-12 items-center justify-center overflow-hidden rounded-2xl bg-emerald-50 transition-transform duration-300 group-hover:scale-105">
+          <div className="flex size-14 items-center justify-center overflow-hidden rounded-2xl bg-emerald-50 transition-transform duration-300 group-hover:scale-105">
             <Image
               src="/daanlogo.png"
               alt="Daan logo"
-              width={48}
-              height={48}
+              width={56}
+              height={56}
               priority
               className="size-full object-contain"
             />
           </div>
 
           <div className="flex flex-col">
-            <span className="text-2xl font-extrabold tracking-tight text-emerald-950">
+            <span className="text-3xl font-extrabold tracking-tight text-emerald-950">
               Daan<span className="text-emerald-600">.</span>
             </span>
-            <span className="-mt-1 text-[10px] font-medium tracking-[0.13em] text-slate-500">
+            <span className="mt-0.5 text-xs font-semibold tracking-[0.12em] text-slate-500">
               DONATE WITH TRUST
             </span>
           </div>
@@ -52,13 +54,13 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <nav
           aria-label="Main navigation"
-          className="hidden items-center gap-1 rounded-full border border-slate-200/80 bg-slate-50/80 p-1 md:flex"
+          className="hidden items-center gap-0.5 xl:flex"
         >
           {navLinks.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-full px-5 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-white hover:text-emerald-800 hover:shadow-sm"
+              className="whitespace-nowrap rounded-full px-3 py-3 text-[15px] font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
             >
               {item.name}
             </Link>
@@ -66,44 +68,44 @@ export function Navbar() {
         </nav>
 
         {/* Desktop Actions */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden shrink-0 items-center gap-3 md:flex">
           <Link
             href="/login"
-            className="px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:text-emerald-700"
+            className="whitespace-nowrap px-2 py-3 text-[15px] font-semibold text-slate-700 transition-colors hover:text-emerald-700"
           >
             Log in
           </Link>
 
           <Link
             href="/register"
-            className="flex h-11 items-center justify-center rounded-full bg-emerald-800 px-5 text-sm font-semibold text-white transition-colors hover:bg-emerald-900"
+            className="flex h-12 items-center justify-center whitespace-nowrap rounded-full bg-emerald-800 px-5 text-[15px] font-bold text-white shadow-sm transition-colors hover:bg-emerald-900"
           >
-            <Heart className="mr-2 size-4" />
+            <Heart className="mr-2 size-5" />
             Start Giving
             <ArrowUpRight className="ml-2 size-4" />
           </Link>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile / Tablet Navigation */}
         <Sheet>
           <SheetTrigger
-            className="flex size-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition-colors hover:bg-slate-50 md:hidden"
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition-colors hover:bg-emerald-50 md:hidden"
             aria-label="Open navigation menu"
           >
-            <Menu className="size-5" />
+            <Menu className="size-6" />
           </SheetTrigger>
 
-          <SheetContent side="right" className="w-[300px] sm:w-[360px]">
+          <SheetContent side="right" className="w-[320px] sm:w-[380px]">
             <SheetHeader className="border-b pb-5 text-left">
               <Link href="/" className="flex items-center gap-3">
                 <Image
                   src="/daanlogo.png"
                   alt="Daan logo"
-                  width={44}
-                  height={44}
+                  width={48}
+                  height={48}
                   className="rounded-xl"
                 />
-                <span className="text-2xl font-extrabold text-emerald-950">
+                <span className="text-3xl font-extrabold text-emerald-950">
                   Daan<span className="text-emerald-600">.</span>
                 </span>
               </Link>
@@ -115,13 +117,13 @@ export function Navbar() {
 
             <nav
               aria-label="Mobile navigation"
-              className="mt-6 flex flex-col gap-2"
+              className="mt-6 flex flex-col gap-1.5"
             >
               {navLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
+                  className="rounded-xl px-4 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800"
                 >
                   {item.name}
                 </Link>
@@ -131,29 +133,29 @@ export function Navbar() {
             <div className="mt-6 flex flex-col gap-3">
               <Link
                 href="/login"
-                className="flex h-11 items-center justify-center rounded-xl border border-slate-200 text-sm font-medium transition-colors hover:bg-slate-50"
+                className="flex h-12 items-center justify-center rounded-xl border border-slate-200 text-base font-semibold text-slate-700 transition-colors hover:bg-slate-50"
               >
                 Log in to your account
               </Link>
 
               <Link
                 href="/register"
-                className="flex h-11 items-center justify-center rounded-xl bg-emerald-800 text-sm font-semibold text-white transition-colors hover:bg-emerald-900"
+                className="flex h-12 items-center justify-center rounded-xl bg-emerald-800 text-base font-bold text-white transition-colors hover:bg-emerald-900"
               >
-                <Heart className="mr-2 size-4" />
+                <Heart className="mr-2 size-5" />
                 Start Giving
                 <ArrowUpRight className="ml-2 size-4" />
               </Link>
             </div>
 
-            <div className="mt-8 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
-              <ShieldCheck className="mb-2 size-6 text-emerald-800" />
-              <p className="text-sm font-semibold text-emerald-950">
+            <div className="mt-8 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
+              <ShieldCheck className="mb-3 size-7 text-emerald-800" />
+              <p className="text-base font-bold text-emerald-950">
                 Giving with confidence
               </p>
-              <p className="mt-1 text-xs leading-5 text-slate-600">
-                Discover needs and support people through Daan&apos;s mission
-                of trusted giving.
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Discover real needs and support people through Daan&apos;s
+                mission of trusted giving.
               </p>
             </div>
           </SheetContent>
