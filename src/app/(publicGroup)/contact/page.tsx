@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   HeartHandshake,
-  Mail,
   MessageCircle,
   ShieldCheck,
   HandHeart,
@@ -34,7 +33,7 @@ const contactOptions = [
     icon: HelpCircle,
     title: "General Questions",
     description:
-      "Discover Daan&apos;s mission, our approach to giving, and how the platform connects people.",
+      "Discover Daan's mission, our approach to giving, and how the platform connects people.",
     action: "About Daan",
     href: "/about",
     color: "bg-green-100 text-green-800",
@@ -96,9 +95,11 @@ export default function ContactPage() {
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700">
               How Can We Help?
             </p>
+
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
               Find the right place to start.
             </h2>
+
             <p className="mt-4 leading-7 text-slate-600">
               Choose the option that best matches what you need.
             </p>
@@ -173,24 +174,30 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact note */}
+      {/* Get Involved */}
       <section className="px-5 pb-12 sm:px-8">
-        <div className="mx-auto flex max-w-3xl items-start gap-4 rounded-2xl border border-emerald-100 bg-white p-5 sm:p-6">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
-            <Mail className="h-5 w-5" />
+        <div className="mx-auto max-w-3xl rounded-2xl border border-emerald-100 bg-white p-6 text-center shadow-sm transition duration-300 hover:shadow-lg sm:p-8">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <HeartHandshake className="h-6 w-6" />
           </div>
 
-          <div>
-            <h3 className="font-bold text-[#173B2A]">
-              Need direct contact?
-            </h3>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Daan&apos;s direct email address and contact form are not listed
-              here because no verified contact details have been configured on
-              this page yet. We don&apos;t want to display incorrect contact
-              information.
-            </p>
-          </div>
+          <h3 className="mt-4 text-xl font-bold text-[#173B2A]">
+            Together, We Can Make a Difference
+          </h3>
+
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
+            Every act of kindness brings hope to someone in need. Explore Daan
+            and discover how you can be part of a community built on compassion
+            and trusted giving.
+          </p>
+
+          <Link
+            href="/requests"
+            className="group mt-6 inline-flex items-center gap-2 rounded-xl bg-[#17633C] px-6 py-3 text-sm font-bold text-white transition duration-300 hover:-translate-y-1 hover:bg-[#104C2D]"
+          >
+            Explore Donation Requests
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </section>
     </main>
