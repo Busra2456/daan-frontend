@@ -22,23 +22,23 @@ const slides = [
     description:
       "Help struggling patients get the medical treatment, medicine, and care they urgently need.",
     image:
-      "https://www.vgmhospital.com/assets/images/home/personal-experience.jpeg",
+      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1800&q=85",
     icon: Stethoscope,
   },
   {
     category: "FOOD & BASIC NEEDS",
     title: "No family should go hungry.",
     description:
-      "Support people facing hardship with food and other essential daily needs.",
+      "Support struggling families who need food and essential daily supplies.",
     image:
-      "https://elcomercio.pe/resizer/v2/PU2UPTTBOBCNVLWZY4UUY4742E.jpg?auth=cf4c16d05778a4a4c693c74c6d22037c313f3a7695b5811f001b694093089276&height=1600&quality=75&smart=true&width=2400",
+      "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1800&q=85",
     icon: Utensils,
   },
   {
     category: "EDUCATION SUPPORT",
     title: "Every child deserves to learn.",
     description:
-      "Help children access books, school supplies, and opportunities to continue their education.",
+      "Help children from struggling families access books and continue their education.",
     image:
       "https://images.unsplash.com/photo-1491013516836-7db643ee125a?auto=format&fit=crop&w=1800&q=85",
     icon: BookOpen,
@@ -47,18 +47,18 @@ const slides = [
     category: "FAMILY SUPPORT",
     title: "Stand beside families in need.",
     description:
-      "A thoughtful act of generosity can help people through challenging circumstances.",
+      "Your kindness can bring hope to families facing difficult circumstances.",
     image:
-      "https://assets.sport.ro/assets/protv/2020/04/22/image_galleries/73523/7800-de-copii-si-parinti-din-mediul-rural-primesc-pachete-din-partea-world-vision-romania_1.jpg",
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1800&q=85",
     icon: HeartHandshake,
   },
   {
     category: "DONATE WITH TRUST",
-    title: "Understand their needs. Give with care.",
+    title: "A little help can make a difference.",
     description:
-      "Explore donation requests, review the available information, and decide how you can help.",
+      "Understand people's needs and choose how you can support them through Daan.",
     image:
-      "https://cdn.prod.website-files.com/673780b24208123808f07874/697916d6ade86c8cc3948547_AdobeStock_1299304310%20Crop.jpg",
+      "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=85",
     icon: Heart,
   },
 ];
