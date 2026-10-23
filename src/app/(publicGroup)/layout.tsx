@@ -1,15 +1,19 @@
+
+import { Footer } from "@/components/shared/footer";
 import { Navbar } from "@/components/shared/navbar";
 
-const PublicGroupLayout = async ({
-  children,
-}: {
+interface PublicGroupLayoutProps {
   children: React.ReactNode;
-}) => {
+}
+
+const PublicGroupLayout = ({ children }: PublicGroupLayoutProps) => {
   return (
-    <div>
+    <>
       <Navbar />
-      {children}
-    </div>
+      <main>{children}</main>
+      <Footer />
+
+    </>
   );
 };
 
