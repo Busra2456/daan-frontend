@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getMeAction } from "@/api";
 import { useLogoutAction } from "@/hooks/auth.hook";
+import ThemeToggle from "@/components/theme-toggle";
 
 import {
   Sheet,
@@ -55,11 +56,7 @@ export function Navbar() {
 
   const { mutateAsync, isPending } = useLogoutAction();
 
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<MeResponse>({
+  const { data, isLoading, isError } = useQuery<MeResponse>({
     queryKey: ["me"],
     queryFn: getMeAction,
     staleTime: 60 * 1000,
@@ -85,21 +82,54 @@ export function Navbar() {
     }
   };
 
-  
-const renderAuthActions = (mobile = false) => {
-  if (isLoading) {
-    return (
-      <div
-        className={
-          mobile
-            ? "h-12 w-full animate-pulse rounded-2xl bg-[#edf5ef]"
-            : "h-12 w-32 animate-pulse rounded-full bg-[#edf5ef]"
-        }
-      />
-    );
-  }
+  const renderAuthActions = (mobile = false) => {
+    if (isLoading) {
+      return (
+        <div
+          aria-label="Loading account"
+          className={
+            mobile
+              ? "h-12 w-full animate-pulse rounded-2xl bg-muted"
+              : "h-12 w-32 animate-pulse rounded-full bg-muted"
+          }
+        />
+      );
+    }
 
-  if (isLoggedIn && dashboardUrl) {
+    if (isLoggedIn && dashboardUrl) {
+      return (
+        <div
+          className={
+            mobile
+              ? "flex flex-col gap-3"
+              : "flex shrink-0 items-center gap-3"
+          }
+        >
+          <Link
+            href={dashboardUrl}
+            className={`flex min-h-12 items-center justify-center gap-2 rounded-full border border-border bg-secondary px-5 font-bold text-secondary-foreground transition-colors hover:bg-accent ${
+              mobile ? "min-h-[52px] w-full rounded-2xl text-base" : "text-sm"
+            }`}
+          >
+            <LayoutDashboard className="size-[18px] shrink-0" />
+            <span>Dashboard</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isPending}
+            className={`flex min-h-12 items-center justify-center gap-2 rounded-full border border-rose-300 bg-rose-50 px-5 font-bold text-rose-800 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-200 dark:hover:bg-rose-900/60 ${
+              mobile ? "min-h-[52px] w-full rounded-2xl text-base" : "text-sm"
+            }`}
+          >
+            <LogOut className="size-[18px] shrink-0" />
+            <span>{isPending ? "Logging out..." : "Logout"}</span>
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div
         className={
@@ -109,80 +139,70 @@ const renderAuthActions = (mobile = false) => {
         }
       >
         <Link
-          href={dashboardUrl}
-          className={
-            mobile
-              ? "flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-[#d5e5d9] bg-[#f0f7f1] px-5 text-base font-bold text-[#173d2d] transition-colors hover:bg-[#e5f1e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
-              : "flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#d5e5d9] bg-[#f0f7f1] px-5 text-base font-bold text-[#173d2d] transition-colors hover:border-[#b9d4c0] hover:bg-[#e5f1e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
-          }
+          href="/login"
+          className={`flex min-h-12 items-center justify-center rounded-full border border-border px-5 font-bold text-foreground transition-colors hover:bg-accent ${
+            mobile ? "min-h-[52px] rounded-2xl text-base" : "text-sm"
+          }`}
         >
-          <LayoutDashboard className="size-[18px] shrink-0" />
-          <span>Dashboard</span>
+          Log in
         </Link>
 
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={isPending}
-          className={
-            mobile
-              ? "flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-5 text-base font-bold text-rose-700 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              : "flex min-h-12 items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 text-base font-bold text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          }
+        <Link
+          href="/register"
+          className={`group flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 font-bold text-primary-foreground shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+            mobile ? "min-h-[52px] rounded-2xl text-base" : "text-sm"
+          }`}
         >
-          <LogOut className="size-[18px] shrink-0" />
-          <span>{isPending ? "Logging out..." : "Logout"}</span>
-        </button>
+          <Heart className="size-[18px] shrink-0" />
+          <span>{mobile ? "Get Started" : "Donate Now"}</span>
+          <ArrowUpRight className="size-[18px] shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </Link>
       </div>
     );
-  }
+  };
+
+  const renderNavLinks = (mobile = false) =>
+    navLinks.map((item) => {
+      const active =
+        pathname === item.href ||
+        (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          aria-current={active ? "page" : undefined}
+          className={`${
+            mobile
+              ? "flex items-center justify-between rounded-2xl px-4 py-3.5 text-base"
+              : "whitespace-nowrap rounded-full px-3.5 py-3 text-sm"
+          } font-semibold transition-colors ${
+            active
+              ? "bg-accent text-accent-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          }`}
+        >
+          <span>{item.name}</span>
+          {mobile && item.href === "/requests" && (
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">
+              Explore
+            </span>
+          )}
+        </Link>
+      );
+    });
 
   return (
-    <div
-      className={
-        mobile
-          ? "flex flex-col gap-3"
-          : "flex shrink-0 items-center gap-4"
-      }
-    >
-      <Link
-        href="/login"
-        className={
-          mobile
-            ? "flex min-h-[52px] items-center justify-center rounded-2xl border border-[#dce8df] bg-white px-5 text-base font-bold text-[#173d2d] transition-colors hover:bg-[#f4f8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
-            : "inline-flex min-h-12 items-center justify-center rounded-full px-3 text-base font-bold text-[#365345] transition-colors hover:text-[#145c40] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
-        }
-      >
-        Log in
-      </Link>
-
-      <Link
-        href="/register"
-        className={
-          mobile
-            ? "group flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#145c40] px-5 text-base font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#104a33] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
-            : "group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#145c40] px-5 text-base font-bold text-white shadow-[0_5px_16px_rgba(20,92,64,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#104a33] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
-        }
-      >
-        <Heart className="size-[18px] shrink-0" />
-        <span>{mobile ? "Get Started" : "Donate Now"}</span>
-        <ArrowUpRight className="size-[18px] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-      </Link>
-    </div>
-  );
-};
-
-
-  return (
-    <header className="sticky top-0 z-50 border-b border-emerald-950/10 bg-[#fcfdfb]/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/95 text-foreground shadow-sm backdrop-blur-xl">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
-        <div className="flex min-h-[82px] items-center justify-between gap-5">
+        <div className="flex min-h-[76px] items-center justify-between gap-3 sm:min-h-[82px] sm:gap-5">
+          {/* Brand */}
           <Link
             href="/"
             aria-label="Daan homepage"
-            className="group flex shrink-0 items-center gap-3"
+            className="group flex shrink-0 items-center gap-2 sm:gap-3"
           >
-            <div className="relative flex size-[52px] items-center justify-center rounded-[18px] bg-emerald-50 ring-1 ring-emerald-900/5 transition duration-300 group-hover:rotate-[-4deg] group-hover:scale-105">
+            <div className="relative flex size-10 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-primary/10 transition duration-300 group-hover:rotate-[-4deg] group-hover:scale-105 sm:size-[52px]">
               <Image
                 src="/daanlogo.png"
                 alt="Daan logo"
@@ -194,126 +214,106 @@ const renderAuthActions = (mobile = false) => {
             </div>
 
             <div>
-              <span className="block text-[30px] font-black leading-none tracking-[-1.5px] text-[#123c2c]">
-                daan<span className="text-emerald-600">.</span>
+              <span className="block text-2xl font-black leading-none tracking-[-1.5px] text-foreground sm:text-[30px]">
+                daan<span className="text-primary">.</span>
               </span>
-              <span className="mt-1.5 block text-[9px] font-bold tracking-[1.7px] text-slate-500">
+              <span className="mt-1.5 hidden text-[9px] font-bold tracking-[1.7px] text-muted-foreground sm:block">
                 DONATE WITH TRUST
               </span>
             </div>
           </Link>
 
+          {/* Desktop navigation */}
           <nav
             aria-label="Main navigation"
             className="hidden items-center gap-0.5 xl:flex"
           >
-            {navLinks.map((item) => {
-              const active = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`whitespace-nowrap rounded-full px-3.5 py-3 text-[14px] font-semibold transition-all duration-200 ${
-                    active
-                      ? "bg-emerald-50 text-[#145c40]"
-                      : "text-slate-600 hover:bg-emerald-50 hover:text-[#145c40]"
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              );
-            })}
+            {renderNavLinks()}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
+          {/* Desktop actions */}
+          <div className="hidden shrink-0 items-center gap-2 md:flex">
+            <ThemeToggle />
             {renderAuthActions()}
           </div>
 
-          <Sheet>
-            <SheetTrigger
-              aria-label="Open navigation menu"
-              className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-900/10 bg-white text-[#145c40] shadow-sm transition-colors hover:bg-emerald-50 md:hidden"
-            >
-              <Menu className="size-6" />
-            </SheetTrigger>
+          {/* Mobile navigation */}
+          <div className="flex shrink-0 items-center gap-2 md:hidden">
+            <ThemeToggle />
 
-            <SheetContent
-              side="right"
-              className="w-[min(88vw,390px)] overflow-y-auto border-l border-emerald-900/10 bg-[#fcfdfb] p-6"
-            >
-              <SheetHeader className="border-b border-emerald-900/10 pb-6 text-left">
-                <Link href="/" className="flex items-center gap-3">
-                  <Image
-                    src="/daanlogo.png"
-                    alt="Daan logo"
-                    width={46}
-                    height={46}
-                    className="rounded-xl"
-                  />
-                  <span className="text-3xl font-black tracking-tight text-[#123c2c]">
-                    daan<span className="text-emerald-600">.</span>
-                  </span>
-                </Link>
-
-                <SheetTitle className="pt-2 text-sm font-normal leading-6 text-slate-500">
-                  Every act of kindness brings hope to someone.
-                </SheetTitle>
-              </SheetHeader>
-
-              <nav
-                aria-label="Mobile navigation"
-                className="mt-6 flex flex-col gap-1.5"
+            <Sheet>
+              <SheetTrigger
+                aria-label="Open navigation menu"
+                className="flex size-11 items-center justify-center rounded-2xl border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                {navLinks.map((item) => {
-                  const active = pathname === item.href;
+                <Menu className="size-6" />
+              </SheetTrigger>
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      aria-current={active ? "page" : undefined}
-                      className={`flex items-center justify-between rounded-2xl px-4 py-3.5 text-[16px] font-semibold transition-colors ${
-                        active
-                          ? "bg-emerald-50 text-emerald-800"
-                          : "text-slate-700 hover:bg-emerald-50 hover:text-emerald-800"
-                      }`}
-                    >
-                      <span>{item.name}</span>
-                      {item.href === "/requests" && (
-                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-800">
-                          Explore
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <SheetContent
+                side="right"
+                className="w-[min(88vw,390px)] overflow-y-auto border-l border-border bg-background p-5 text-foreground sm:p-6"
+              >
+                <SheetHeader className="border-b border-border pb-6 text-left">
+                  <Link
+                    href="/"
+                    aria-label="Daan homepage"
+                    className="flex items-center gap-3"
+                  >
+                    <Image
+                      src="/daanlogo.png"
+                      alt="Daan logo"
+                      width={46}
+                      height={46}
+                      className="rounded-xl"
+                    />
+                    <span className="text-3xl font-black tracking-tight text-foreground">
+                      daan<span className="text-primary">.</span>
+                    </span>
+                  </Link>
 
-              <div className="mt-6">{renderAuthActions(true)}</div>
+                  <SheetTitle className="pt-2 text-sm font-normal leading-6 text-muted-foreground">
+                    Every act of kindness brings hope to someone.
+                  </SheetTitle>
+                </SheetHeader>
 
-              <div className="mt-8 rounded-[24px] border border-emerald-100 bg-[#f0f7f1] p-5">
-                <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-white text-emerald-800 shadow-sm">
-                  <ShieldCheck className="size-6" />
+                <div className="mt-5 flex items-center justify-between rounded-2xl border border-border bg-card p-3">
+                  <span className="text-sm font-semibold text-foreground">
+                    Appearance
+                  </span>
+                  <ThemeToggle />
                 </div>
 
-                <p className="text-[16px] font-bold text-[#123c2c]">
-                  Kindness with confidence
-                </p>
+                <nav
+                  aria-label="Mobile navigation"
+                  className="mt-5 flex flex-col gap-1.5"
+                >
+                  {renderNavLinks(true)}
+                </nav>
 
-                <p className="mt-2 text-[13px] leading-6 text-slate-600">
-                  Discover people&apos; needs and support meaningful causes through
-                  Daan&apos; mission of trusted giving.
-                </p>
+                <div className="mt-6">{renderAuthActions(true)}</div>
 
-                <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-800">
-                  <Sparkles className="size-4" />
-                  Small help. Real hope.
+                <div className="mt-8 rounded-3xl border border-border bg-emerald-500/5 p-5">
+                  <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <ShieldCheck className="size-6" />
+                  </div>
+
+                  <p className="text-base font-bold text-foreground">
+                    Kindness with confidence
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    Discover people&apos;s needs and support meaningful causes
+                    through Daan&apos;s mission of trusted giving.
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-primary">
+                    <Sparkles className="size-4" />
+                    Small help. Real hope.
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
