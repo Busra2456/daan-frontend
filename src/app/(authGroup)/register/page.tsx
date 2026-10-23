@@ -15,27 +15,28 @@ const communityFeatures = [
     title: "Reviewed",
     subtitle: "Requests",
     description:
-      "Explore donation requests that have been reviewed and marked as verified.",
-    href: "/admin-dashboard/donation-requests/verified",
+      "Learn how Daan reviews donation requests before marking them as verified.",
+    href: "/about",
     icon: ShieldCheck,
   },
   {
     title: "Thoughtful",
     subtitle: "Giving",
     description:
-      "Explore available donation requests and review their information before deciding to help.",
-    href: "/donor-dashboard",
+      "Sign in to explore donation opportunities and available request information.",
+    href: "/login",
     icon: HeartHandshake,
   },
   {
     title: "Connected",
     subtitle: "Community",
     description:
-      "Learn how Daan connects people who need support with people willing to give.",
+      "Discover how Daan connects people who need support with people willing to give.",
     href: "/about",
     icon: Users,
   },
 ];
+
 export default function RegisterPage() {
   return (
     <main className="min-h-svh bg-[#f7faf7] text-[#173d2d] lg:grid lg:grid-cols-2">
@@ -99,6 +100,7 @@ export default function RegisterPage() {
               </p>
             </div>
 
+            {/* Registration form */}
             <div className="rounded-2xl border border-[#e0e9e2] bg-white p-5 shadow-[0_12px_40px_rgba(18,60,44,0.05)] sm:p-7">
               <RegisterForm />
             </div>
@@ -198,34 +200,46 @@ export default function RegisterPage() {
             and compassion at the heart of every connection.
           </p>
 
-          {/* Community feature cards */}
+          {/* Clickable community feature cards */}
           <div className="mt-10 grid w-full max-w-lg grid-cols-3 gap-3">
             {communityFeatures.map((feature) => {
               const Icon = feature.icon;
 
               return (
-                <article
+                <Link
                   key={feature.title}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.06] p-3 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/30 hover:bg-white/[0.1] sm:p-4"
+                  href={feature.href}
+                  title={feature.description}
+                  aria-label={`${feature.title} ${feature.subtitle}: ${feature.description}`}
+                  className="group flex min-w-0 flex-col items-center rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-center transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/[0.12] hover:shadow-lg hover:shadow-emerald-950/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#123c2c] sm:p-4"
                 >
-                  <Icon
-                    size={25}
-                    className="mx-auto text-emerald-300 transition-transform duration-300 group-hover:scale-110"
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-emerald-400/10 transition-colors duration-300 group-hover:bg-emerald-400/20">
+                    <Icon
+                      size={24}
+                      className="text-emerald-300 transition-transform duration-300 group-hover:scale-110"
+                      aria-hidden="true"
+                    />
+                  </span>
+
+                  <span className="mt-3 text-sm font-bold text-white">
+                    {feature.title}
+                  </span>
+
+                  <span className="mt-1 text-xs leading-5 text-white/60">
+                    {feature.subtitle}
+                  </span>
+
+                  <ArrowRight
+                    size={14}
+                    className="mt-2 text-emerald-300 transition-transform duration-300 group-hover:translate-x-1"
                     aria-hidden="true"
                   />
-
-                  <p className="mt-3 text-sm font-bold text-white">
-                    {feature.title}
-                  </p>
-
-                  <p className="mt-1 text-xs leading-5 text-white/55">
-                    {feature.subtitle}
-                  </p>
-                </article>
+                </Link>
               );
             })}
           </div>
 
+          {/* Mission link */}
           <Link
             href="/about"
             className="group mt-8 inline-flex items-center gap-2 rounded-lg text-sm font-bold text-emerald-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#123c2c]"
