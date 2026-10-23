@@ -22,6 +22,29 @@ const footerLinks = {
   ],
 };
 
+const socialLinks = [
+  {
+    name: "Facebook",
+    href: "https://www.facebook.com/",
+    symbol: "f",
+  },
+  {
+    name: "X (Twitter)",
+    href: "https://x.com/",
+    symbol: "𝕏",
+  },
+  {
+    name: "YouTube",
+    href: "https://www.youtube.com/",
+    symbol: "▶",
+  },
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/",
+    symbol: "in",
+  },
+];
+
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -61,7 +84,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Explore */}
+          {/* Explore links */}
           <div>
             <h2 className="text-base font-bold uppercase tracking-[1.2px] text-[#123c2c]">
               Explore
@@ -72,7 +95,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-base font-medium text-[#52645a] transition-colors duration-200 hover:text-[#145c40]"
+                    className="text-base font-medium text-[#52645a] transition-colors hover:text-[#145c40]"
                   >
                     {item.label}
                   </Link>
@@ -81,7 +104,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Support links */}
           <div>
             <h2 className="text-base font-bold uppercase tracking-[1.2px] text-[#123c2c]">
               Get Support
@@ -92,7 +115,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-base font-medium text-[#52645a] transition-colors duration-200 hover:text-[#145c40]"
+                    className="text-base font-medium text-[#52645a] transition-colors hover:text-[#145c40]"
                   >
                     {item.label}
                   </Link>
@@ -114,25 +137,63 @@ export function Footer() {
 
             <Link
               href="/requests"
-              className="group mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#145c40] px-5 text-base font-bold text-white transition-all duration-200 hover:bg-[#104a33] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+              className="group mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#145c40] px-5 text-base font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#104a33] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
             >
               <Heart className="size-5" />
               Explore Requests
               <ArrowUpRight className="size-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </Link>
 
-            <Link
-              href="/contact"
-              className="mt-5 flex items-center gap-2 text-base font-medium text-[#52645a] transition-colors duration-200 hover:text-[#145c40]"
+            <a
+              href="mailto:YOUR_EMAIL@example.com"
+              className="mt-5 flex items-center gap-2 text-base font-medium text-[#52645a] transition-colors hover:text-[#145c40]"
             >
               <Mail className="size-5 shrink-0" />
-              Need help? Contact us
-            </Link>
+              Email Us
+            </a>
+          </div>
+        </div>
+
+        {/* Social media */}
+        <div className="mt-12 flex flex-col gap-5 border-t border-[#dce8df] pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-[#123c2c]">
+              Connect with Daan
+            </h2>
+
+            <p className="mt-1 text-sm leading-6 text-[#64746a]">
+              Follow our journey and help spread kindness.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {socialLinks.map((social) => (
+              <a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Visit Daan on ${social.name}`}
+                title={social.name}
+                className="flex size-11 items-center justify-center rounded-full border border-[#dce8df] bg-white text-[#315744] transition-all duration-200 hover:-translate-y-1 hover:border-[#145c40] hover:bg-[#145c40] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+              >
+                <span
+                  aria-hidden="true"
+                  className={
+                    social.name === "YouTube"
+                      ? "flex size-6 items-center justify-center rounded-md text-base font-black"
+                      : "text-base font-black"
+                  }
+                >
+                  {social.symbol}
+                </span>
+              </a>
+            ))}
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col gap-4 border-t border-[#dce8df] pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 flex flex-col gap-4 border-t border-[#dce8df] pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-[#64746a]">
             © {currentYear} Daan. All rights reserved.
           </p>
