@@ -14,23 +14,28 @@ const communityFeatures = [
   {
     title: "Reviewed",
     subtitle: "Requests",
-    description: "Requests can be reviewed before being presented as verified.",
+    description:
+      "Explore donation requests that have been reviewed and marked as verified.",
+    href: "/admin-dashboard/donation-requests/verified",
     icon: ShieldCheck,
   },
   {
     title: "Thoughtful",
     subtitle: "Giving",
-    description: "Explore available information before deciding to help.",
+    description:
+      "Explore available donation requests and review their information before deciding to help.",
+    href: "/donor-dashboard",
     icon: HeartHandshake,
   },
   {
     title: "Connected",
     subtitle: "Community",
-    description: "Bring people together through compassion and support.",
+    description:
+      "Learn how Daan connects people who need support with people willing to give.",
+    href: "/about",
     icon: Users,
   },
 ];
-
 export default function RegisterPage() {
   return (
     <main className="min-h-svh bg-[#f7faf7] text-[#173d2d] lg:grid lg:grid-cols-2">

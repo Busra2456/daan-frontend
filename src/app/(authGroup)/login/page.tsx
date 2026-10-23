@@ -15,21 +15,24 @@ const features = [
   {
     title: "Reviewed",
     subtitle: "Requests",
-    description: "Explore requests reviewed by the Daan admin team.",
-    href: "/requests",
+    description:
+      "Explore donation requests reviewed by the Daan admin team.",
+    href: "/admin-dashboard/donation-requests/verified",
     icon: ShieldCheck,
   },
   {
     title: "Trusted",
     subtitle: "Giving",
-    description: "Discover ways to support people in need.",
-    href: "/requests",
+    description:
+      "Visit the donor dashboard to explore opportunities to help.",
+    href: "/donor-dashboard",
     icon: HeartHandshake,
   },
   {
     title: "Together",
     subtitle: "Community",
-    description: "Learn how Daan connects people through compassion.",
+    description:
+      "Learn how Daan connects people through compassion.",
     href: "/about",
     icon: Users,
   },
