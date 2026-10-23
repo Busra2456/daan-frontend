@@ -85,91 +85,93 @@ export function Navbar() {
     }
   };
 
-  const renderAuthActions = (mobile = false) => {
-    if (isLoading) {
-      return (
-        <div
-          className={
-            mobile
-              ? "h-[50px] animate-pulse rounded-2xl bg-emerald-50"
-              : "h-10 w-32 animate-pulse rounded-full bg-emerald-50"
-          }
-        />
-      );
-    }
+  
+const renderAuthActions = (mobile = false) => {
+  if (isLoading) {
+    return (
+      <div
+        className={
+          mobile
+            ? "h-12 w-full animate-pulse rounded-2xl bg-[#edf5ef]"
+            : "h-12 w-32 animate-pulse rounded-full bg-[#edf5ef]"
+        }
+      />
+    );
+  }
 
-    if (isLoggedIn && dashboardUrl) {
-      return (
-        <div
-          className={
-            mobile
-              ? "flex flex-col gap-3"
-              : "flex shrink-0 items-center gap-3"
-          }
-        >
-          <Link
-            href={dashboardUrl}
-            className={
-  mobile
-    ? "flex h-12 items-center justify-center gap-2 rounded-xl border border-[#dce8df] bg-white px-5 text-base font-semibold text-[#145c40] shadow-sm transition-all duration-200 hover:border-[#145c40] hover:bg-[#f4f8f5]"
-    : "flex min-h-12 items-center gap-2 rounded-full border border-[#dce8df] bg-white px-5 text-base font-semibold text-[#145c40] shadow-sm transition-all duration-200 hover:border-[#145c40] hover:bg-[#f4f8f5]"
-}
-          >
-            <LayoutDashboard className="size-4" />
-            Dashboard
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={isPending}
-           className={
-  mobile
-    ? "flex h-12 items-center justify-center gap-2 rounded-xl border border-[#e2e5e2] bg-white px-5 text-base font-semibold text-[#47534b] transition-all duration-200 hover:border-[#cbd2cc] hover:bg-[#f5f6f5] disabled:cursor-not-allowed disabled:opacity-50"
-    : "flex min-h-12 items-center gap-2 rounded-full border border-[#e2e5e2] bg-white px-5 text-base font-semibold text-[#47534b] transition-all duration-200 hover:border-[#cbd2cc] hover:bg-[#f5f6f5] disabled:cursor-not-allowed disabled:opacity-50"
-}
-          >
-            <LogOut className="size-4" />
-            {isPending ? "Logging out..." : "Logout"}
-          </button>
-        </div>
-      );
-    }
-
+  if (isLoggedIn && dashboardUrl) {
     return (
       <div
         className={
           mobile
             ? "flex flex-col gap-3"
-            : "flex shrink-0 items-center gap-4"
+            : "flex shrink-0 items-center gap-3"
         }
       >
         <Link
-          href="/login"
+          href={dashboardUrl}
           className={
             mobile
-              ? "flex h-[50px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-[15px] font-bold text-slate-700 hover:bg-slate-50"
-              : "text-[15px] font-bold text-slate-700 transition-colors hover:text-emerald-700"
+              ? "flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-[#d5e5d9] bg-[#f0f7f1] px-5 text-base font-bold text-[#173d2d] transition-colors hover:bg-[#e5f1e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+              : "flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#d5e5d9] bg-[#f0f7f1] px-5 text-base font-bold text-[#173d2d] transition-colors hover:border-[#b9d4c0] hover:bg-[#e5f1e8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
           }
         >
-          Log in
+          <LayoutDashboard className="size-[18px] shrink-0" />
+          <span>Dashboard</span>
         </Link>
 
-        <Link
-          href="/register"
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isPending}
           className={
             mobile
-              ? "flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#145c40] text-[15px] font-bold text-white hover:bg-[#104a33]"
-              : "group flex min-h-[50px] items-center gap-2 rounded-full bg-[#145c40] px-5 text-[14px] font-bold text-white shadow-[0_5px_16px_rgba(20,92,64,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#104a33] hover:shadow-lg"
+              ? "flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-5 text-base font-bold text-rose-700 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              : "flex min-h-12 items-center justify-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-5 text-base font-bold text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           }
         >
-          <Heart className="size-[17px]" />
-          <span>{mobile ? "Get Started" : "Donate Now"}</span>
-          <ArrowUpRight className="size-4" />
-        </Link>
+          <LogOut className="size-[18px] shrink-0" />
+          <span>{isPending ? "Logging out..." : "Logout"}</span>
+        </button>
       </div>
     );
-  };
+  }
+
+  return (
+    <div
+      className={
+        mobile
+          ? "flex flex-col gap-3"
+          : "flex shrink-0 items-center gap-4"
+      }
+    >
+      <Link
+        href="/login"
+        className={
+          mobile
+            ? "flex min-h-[52px] items-center justify-center rounded-2xl border border-[#dce8df] bg-white px-5 text-base font-bold text-[#173d2d] transition-colors hover:bg-[#f4f8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+            : "inline-flex min-h-12 items-center justify-center rounded-full px-3 text-base font-bold text-[#365345] transition-colors hover:text-[#145c40] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+        }
+      >
+        Log in
+      </Link>
+
+      <Link
+        href="/register"
+        className={
+          mobile
+            ? "group flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#145c40] px-5 text-base font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#104a33] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+            : "group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#145c40] px-5 text-base font-bold text-white shadow-[0_5px_16px_rgba(20,92,64,0.15)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#104a33] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
+        }
+      >
+        <Heart className="size-[18px] shrink-0" />
+        <span>{mobile ? "Get Started" : "Donate Now"}</span>
+        <ArrowUpRight className="size-[18px] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      </Link>
+    </div>
+  );
+};
+
 
   return (
     <header className="sticky top-0 z-50 border-b border-emerald-950/10 bg-[#fcfdfb]/95 backdrop-blur-xl">

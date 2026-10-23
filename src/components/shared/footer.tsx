@@ -6,7 +6,6 @@ import {
   Heart,
   ShieldCheck,
   Mail,
-  MapPin,
 } from "lucide-react";
 
 const footerLinks = {
@@ -27,8 +26,8 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-emerald-950/10 bg-[#fcfdfb] text-[#173d2d]">
-      <div className="mx-auto max-w-[1440px] px-4 pb-6 pt-14 sm:px-6 lg:px-10 lg:pt-16">
+    <footer className="border-t border-[#dce8df] bg-[#fcfdfb] text-[#173d2d]">
+      <div className="mx-auto max-w-[1440px] px-5 pb-7 pt-14 sm:px-8 sm:pt-16 lg:px-10 lg:pt-20">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
           {/* Brand and mission */}
           <div className="sm:col-span-2 lg:col-span-1">
@@ -40,40 +39,40 @@ export function Footer() {
               <Image
                 src="/daanlogo.png"
                 alt="Daan logo"
-                width={48}
-                height={48}
-                className="size-12 object-contain"
+                width={52}
+                height={52}
+                className="size-[52px] object-contain"
               />
 
-              <span className="text-3xl font-black tracking-tight">
+              <span className="text-3xl font-black tracking-tight text-[#123c2c]">
                 daan<span className="text-emerald-600">.</span>
               </span>
             </Link>
 
-            <p className="mt-5 max-w-sm text-sm leading-7 text-slate-600">
+            <p className="mt-5 max-w-sm text-base leading-8 text-[#52645a]">
               Donate with Trust. Daan connects people who want to help
               with people who need support, building a community where
               kindness can make a real difference.
             </p>
 
-            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
-              <ShieldCheck className="size-4" />
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#dce8df] bg-[#f0f7f1] px-4 py-2.5 text-sm font-semibold text-[#145c40]">
+              <ShieldCheck className="size-5 shrink-0" />
               Giving with trust and care
             </div>
           </div>
 
-          {/* Explore links */}
+          {/* Explore */}
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-[1.5px] text-[#173d2d]">
+            <h2 className="text-base font-bold uppercase tracking-[1.2px] text-[#123c2c]">
               Explore
             </h2>
 
-            <ul className="mt-5 space-y-3.5">
+            <ul className="mt-5 space-y-4">
               {footerLinks.explore.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-600 transition-colors hover:text-emerald-700"
+                    className="text-base font-medium text-[#52645a] transition-colors duration-200 hover:text-[#145c40]"
                   >
                     {item.label}
                   </Link>
@@ -82,18 +81,18 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support links */}
+          {/* Support */}
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-[1.5px] text-[#173d2d]">
+            <h2 className="text-base font-bold uppercase tracking-[1.2px] text-[#123c2c]">
               Get Support
             </h2>
 
-            <ul className="mt-5 space-y-3.5">
+            <ul className="mt-5 space-y-4">
               {footerLinks.support.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-600 transition-colors hover:text-emerald-700"
+                    className="text-base font-medium text-[#52645a] transition-colors duration-200 hover:text-[#145c40]"
                   >
                     {item.label}
                   </Link>
@@ -104,43 +103,46 @@ export function Footer() {
 
           {/* Call to action */}
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-[1.5px] text-[#173d2d]">
+            <h2 className="text-base font-bold uppercase tracking-[1.2px] text-[#123c2c]">
               Make a Difference
             </h2>
 
-            <p className="mt-5 text-sm leading-7 text-slate-600">
+            <p className="mt-5 text-base leading-8 text-[#52645a]">
               A small act of kindness can bring hope to someone who
               needs it. Explore requests and find a cause to support.
             </p>
 
             <Link
               href="/requests"
-              className="group mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#145c40] px-5 text-sm font-bold text-white transition-all hover:bg-[#104a33]"
+              className="group mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#145c40] px-5 text-base font-bold text-white transition-all duration-200 hover:bg-[#104a33] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-2"
             >
-              <Heart className="size-4" />
+              <Heart className="size-5" />
               Explore Requests
-              <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight className="size-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </Link>
 
             <Link
               href="/contact"
-              className="mt-4 flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-emerald-700"
+              className="mt-5 flex items-center gap-2 text-base font-medium text-[#52645a] transition-colors duration-200 hover:text-[#145c40]"
             >
-              <Mail className="size-4 shrink-0" />
+              <Mail className="size-5 shrink-0" />
               Need help? Contact us
             </Link>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 flex flex-col gap-4 border-t border-emerald-950/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-slate-500">
+        <div className="mt-14 flex flex-col gap-4 border-t border-[#dce8df] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-[#64746a]">
             © {currentYear} Daan. All rights reserved.
           </p>
 
-          <p className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <p className="flex items-center gap-2 text-sm font-medium text-[#64746a]">
             Made with
-            <Heart className="size-3.5 fill-emerald-600 text-emerald-600" />
+            <Heart
+              className="size-4 fill-emerald-600 text-emerald-600"
+              aria-label="love"
+            />
             for a kinder world
           </p>
         </div>
