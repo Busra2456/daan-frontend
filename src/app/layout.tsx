@@ -1,3 +1,4 @@
+
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 
@@ -8,7 +9,7 @@ import "./globals.css";
 
 const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-geist-sans",
 });
 
 export default async function RootLayout({
@@ -19,11 +20,10 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full antialiased", "font-sans", geist.variable)}
+      className={cn("h-full antialiased", geist.variable)}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col font-sans">
         <Toaster position="top-right" richColors />
-
         <Providers>{children}</Providers>
       </body>
     </html>

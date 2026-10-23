@@ -1,15 +1,20 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* ========================================
+   DAAN THEME TOKENS
+======================================== */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
+  /* Font variables must match layout.tsx */
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-geist-sans);
 
   --color-sidebar-ring: var(--sidebar-ring);
@@ -55,9 +60,8 @@
 }
 
 /* ========================================
-   DAAN BRAND THEME — LIGHT MODE
-   Primary: Emerald Green
-   Neutral: White / Soft Gray
+   LIGHT THEME
+   Daan: Emerald Green + Neutral
 ======================================== */
 
 :root {
@@ -109,7 +113,7 @@
 }
 
 /* ========================================
-   DAAN BRAND THEME — DARK MODE
+   DARK THEME
 ======================================== */
 
 .dark {
@@ -259,6 +263,10 @@
   }
 }
 
+/* ========================================
+   RESPONSIVE SPACING
+======================================== */
+
 @media (min-width: 640px) {
   .daan-container {
     padding-inline: 1.5rem;
@@ -278,6 +286,10 @@
     padding-block: 5rem;
   }
 }
+
+/* ========================================
+   ACCESSIBILITY: REDUCED MOTION
+======================================== */
 
 @media (prefers-reduced-motion: reduce) {
   *,
