@@ -1,9 +1,12 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Heart,
   HeartHandshake,
   HandHeart,
@@ -15,6 +18,9 @@ import {
   Users,
   Video,
   Volume2,
+  Search,
+  ArrowUpDown,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +28,13 @@ import Link from "next/link";
 import { getVerifiedDonationRequests } from "@/api";
 
 const SIX_HOURS = 6 * 60 * 60 * 1000;
+const ITEMS_PER_PAGE = 6;
+
+type SortOption =
+  | "newest"
+  | "oldest"
+  | "amount-low"
+  | "amount-high";
 
 type RequestItem = {
   id: string;
@@ -98,6 +111,7 @@ function RequestCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card">
       <div className="aspect-[16/10] animate-pulse bg-muted" />
+
       <div className="space-y-4 p-5">
         <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
         <div className="h-4 animate-pulse rounded bg-muted" />
@@ -118,7 +132,26 @@ function formatAmount(amount: string | number) {
   return `৳${value.toLocaleString("en-BD")}`;
 }
 
+function getAmount(request: RequestItem) {
+  const amount = Number(request.requiredAmount);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getTimestamp(request: RequestItem) {
+  if (!request.createdAt) {
+    return 0;
+  }
+
+  const timestamp = new Date(request.createdAt).getTime();
+
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
 export default function RequestsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+
   const {
     data: requests = [],
     isPending,
@@ -132,29 +165,75 @@ export default function RequestsPage() {
       const response = await getVerifiedDonationRequests();
       const items = extractRequests(response);
 
-      // Newest requests first, when creation dates are available.
-      return [...items]
+      return items
         .filter(
           (item) =>
             item &&
             typeof item.id === "string" &&
             typeof item.title === "string",
         )
-        .sort((a, b) => {
-          const dateA = a.createdAt
-            ? new Date(a.createdAt).getTime()
-            : 0;
-          const dateB = b.createdAt
-            ? new Date(b.createdAt).getTime()
-            : 0;
-
-          return dateB - dateA;
-        });
+        .sort((a, b) => getTimestamp(b) - getTimestamp(a));
     },
     staleTime: SIX_HOURS,
     refetchInterval: SIX_HOURS,
     refetchIntervalInBackground: true,
   });
+
+  // Search and sort the verified requests returned by the API.
+  const filteredRequests = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    const filtered = requests.filter((request) => {
+      if (!query) {
+        return true;
+      }
+
+      return (
+        request.title.toLowerCase().includes(query) ||
+        request.description.toLowerCase().includes(query)
+      );
+    });
+
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "oldest":
+          return getTimestamp(a) - getTimestamp(b);
+
+        case "amount-low":
+          return getAmount(a) - getAmount(b);
+
+        case "amount-high":
+          return getAmount(b) - getAmount(a);
+
+        default:
+          return getTimestamp(b) - getTimestamp(a);
+      }
+    });
+  }, [requests, searchQuery, sortBy]);
+
+  const totalPages = Math.ceil(
+    filteredRequests.length / ITEMS_PER_PAGE,
+  );
+
+  const safeCurrentPage = Math.min(
+    currentPage,
+    Math.max(totalPages, 1),
+  );
+
+  const paginatedRequests = filteredRequests.slice(
+    (safeCurrentPage - 1) * ITEMS_PER_PAGE,
+    safeCurrentPage * ITEMS_PER_PAGE,
+  );
+
+  function handleSearch(value: string) {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }
+
+  function handleSort(value: SortOption) {
+    setSortBy(value);
+    setCurrentPage(1);
+  }
 
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground transition-colors duration-300">
@@ -164,6 +243,7 @@ export default function RequestsPage() {
           aria-hidden="true"
           className="pointer-events-none absolute -right-28 -top-20 -z-10 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl"
         />
+
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -bottom-20 -left-28 -z-10 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl"
@@ -241,6 +321,7 @@ export default function RequestsPage() {
                 aria-hidden="true"
                 className="absolute -right-3 top-8 h-24 w-24 rounded-full bg-amber-400/25 blur-2xl sm:-right-6"
               />
+
               <div
                 aria-hidden="true"
                 className="absolute -bottom-4 -left-3 h-28 w-28 rounded-full bg-emerald-400/20 blur-2xl"
@@ -251,6 +332,7 @@ export default function RequestsPage() {
                   aria-hidden="true"
                   className="absolute -right-14 -top-14 h-48 w-48 rounded-full border border-white/10"
                 />
+
                 <div
                   aria-hidden="true"
                   className="absolute -right-5 -top-5 h-32 w-32 rounded-full border border-white/10"
@@ -305,9 +387,11 @@ export default function RequestsPage() {
                       <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-800 bg-amber-200 text-emerald-950 dark:border-emerald-950">
                         <Heart className="h-4 w-4" aria-hidden="true" />
                       </span>
+
                       <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-800 bg-emerald-100 text-emerald-900 dark:border-emerald-950">
                         <HandHeart className="h-4 w-4" aria-hidden="true" />
                       </span>
+
                       <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-800 bg-white text-emerald-900 dark:border-emerald-950">
                         <Users className="h-4 w-4" aria-hidden="true" />
                       </span>
@@ -387,7 +471,7 @@ export default function RequestsPage() {
         </div>
       </section>
 
-      {/* All verified requests */}
+      {/* Verified requests listing */}
       <section
         id="verified-requests"
         className="px-5 py-16 sm:px-8 sm:py-20 lg:px-12"
@@ -406,8 +490,8 @@ export default function RequestsPage() {
 
               <p className="mt-4 leading-7 text-muted-foreground">
                 Explore the requests returned by Daan and take time to
-                understand each person&apos;s circumstances before deciding how to
-                help.
+                understand each person&apos;s circumstances before deciding how
+                to help.
               </p>
 
               <p className="mt-3 text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -418,11 +502,97 @@ export default function RequestsPage() {
             {!isPending && !isError && requests.length > 0 && (
               <span className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-card-foreground">
                 <Heart className="size-4 text-emerald-600 dark:text-emerald-400" />
-                {requests.length}{" "}
-                {requests.length === 1 ? "request" : "requests"}
+                {filteredRequests.length} matching{" "}
+                {filteredRequests.length === 1 ? "request" : "requests"}
               </span>
             )}
           </div>
+
+          {/* Search and sort controls */}
+          {!isPending && !isError && requests.length > 0 && (
+            <div className="mb-8 space-y-4">
+              <div className="grid gap-4 md:grid-cols-[1fr_280px]">
+                <div className="relative">
+                  <Search
+                    className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => handleSearch(event.target.value)}
+                    placeholder="Search by request title or description..."
+                    aria-label="Search donation requests"
+                    className="h-12 w-full rounded-xl border border-border bg-card pl-12 pr-11 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+                  />
+
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => handleSearch("")}
+                      aria-label="Clear search"
+                      className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <ArrowUpDown
+                    className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-emerald-700 dark:text-emerald-400"
+                    aria-hidden="true"
+                  />
+
+                  <select
+                    value={sortBy}
+                    onChange={(event) =>
+                      handleSort(event.target.value as SortOption)
+                    }
+                    aria-label="Sort donation requests"
+                    className="h-12 w-full appearance-none rounded-xl border border-border bg-card pl-11 pr-4 text-sm font-medium text-foreground outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+                  >
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="amount-low">Amount: Low to High</option>
+                    <option value="amount-high">Amount: High to Low</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+                <p aria-live="polite">
+                  Showing{" "}
+                  <span className="font-semibold text-foreground">
+                    {filteredRequests.length === 0
+                      ? 0
+                      : (safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}
+                    {"–"}
+                    {Math.min(
+                      safeCurrentPage * ITEMS_PER_PAGE,
+                      filteredRequests.length,
+                    )}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-semibold text-foreground">
+                    {filteredRequests.length}
+                  </span>{" "}
+                  matching requests
+                </p>
+
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => handleSearch("")}
+                    className="font-semibold text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-400"
+                  >
+                    Clear search
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Loading */}
           {isPending && (
@@ -472,7 +642,7 @@ export default function RequestsPage() {
             </div>
           )}
 
-          {/* Empty */}
+          {/* No requests from the API */}
           {!isPending && !isError && requests.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
               <Heart className="mx-auto size-10 text-emerald-600 dark:text-emerald-400" />
@@ -488,116 +658,205 @@ export default function RequestsPage() {
             </div>
           )}
 
-          {/* Every request returned by the API */}
-          {!isPending && !isError && requests.length > 0 && (
-            <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {requests.map((request) => {
-                const imageUrl =
-                  request.situationImage || request.needy?.imageUrl;
+          {/* Search returned no results */}
+          {!isPending &&
+            !isError &&
+            requests.length > 0 &&
+            filteredRequests.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
+                <Search className="mx-auto size-10 text-muted-foreground" />
 
-                return (
-                  <article
-                    key={request.id}
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl"
-                  >
-                    {/* Request image */}
-                    <div className="relative aspect-[16/10] overflow-hidden bg-emerald-50 dark:bg-emerald-950/30">
-                      {imageUrl ? (
-                        <Image
-                          src={imageUrl}
-                          alt={`Situation for ${request.title}`}
-                          fill
-                          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-emerald-100 to-slate-200 text-emerald-800 dark:from-emerald-950 dark:to-slate-900 dark:text-emerald-300">
-                          <ImageOff className="size-10" aria-hidden="true" />
-                          <span className="text-xs font-medium">
-                            No image available
-                          </span>
-                        </div>
-                      )}
+                <h3 className="mt-4 text-xl font-bold text-foreground">
+                  No matching requests
+                </h3>
 
-                      <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-sm dark:border-emerald-900 dark:bg-slate-950/90 dark:text-emerald-300">
-                        <ShieldCheck className="size-4" aria-hidden="true" />
-                        Verified
-                      </span>
-                    </div>
+                <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
+                  Try another keyword to find a verified donation request.
+                </p>
 
-                    {/* Request details */}
-                    <div className="flex flex-1 flex-col p-5">
-                      <h3 className="line-clamp-2 text-xl font-bold text-foreground">
-                        {request.title}
-                      </h3>
+                <button
+                  type="button"
+                  onClick={() => handleSearch("")}
+                  className="mt-5 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                >
+                  Clear Search
+                </button>
+              </div>
+            )}
 
-                      <p className="mt-3 line-clamp-4 flex-1 text-sm leading-6 text-muted-foreground">
-                        {request.description}
-                      </p>
+          {/* Request cards */}
+          {!isPending &&
+            !isError &&
+            paginatedRequests.length > 0 && (
+              <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {paginatedRequests.map((request) => {
+                  const imageUrl =
+                    request.situationImage || request.needy?.imageUrl;
 
-                      <div className="mt-5 flex items-start justify-between gap-3 border-t border-border pt-4">
-                        <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground">
-                            Requested support
-                          </p>
-                          <p className="mt-1 break-words text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
-                            {formatAmount(request.requiredAmount)}
-                          </p>
-                        </div>
-
-                        {request.needy?.address && (
-                          <span className="flex max-w-[48%] items-start gap-1 text-xs text-muted-foreground">
-                            <MapPin
-                              className="mt-0.5 size-4 shrink-0"
-                              aria-hidden="true"
-                            />
-                            <span className="line-clamp-2 break-words">
-                              {request.needy.address}
+                  return (
+                    <article
+                      key={request.id}
+                      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl"
+                    >
+                      {/* Request image */}
+                      <div className="relative aspect-[16/10] overflow-hidden bg-emerald-50 dark:bg-emerald-950/30">
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={`Situation for ${request.title}`}
+                            fill
+                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-emerald-100 to-slate-200 text-emerald-800 dark:from-emerald-950 dark:to-slate-900 dark:text-emerald-300">
+                            <ImageOff className="size-10" aria-hidden="true" />
+                            <span className="text-xs font-medium">
+                              No image available
                             </span>
-                          </span>
+                          </div>
                         )}
+
+                        <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-sm dark:border-emerald-900 dark:bg-slate-950/90 dark:text-emerald-300">
+                          <ShieldCheck className="size-4" aria-hidden="true" />
+                          Verified
+                        </span>
                       </div>
 
-                      {(request.situationVideo || request.situationAudio) && (
-                        <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium text-muted-foreground">
-                          {request.situationVideo && (
-                            <span className="inline-flex items-center gap-1">
-                              <Video
-                                className="size-4 text-emerald-700 dark:text-emerald-400"
-                                aria-hidden="true"
-                              />
-                              Video story
-                            </span>
-                          )}
+                      {/* Request details */}
+                      <div className="flex flex-1 flex-col p-5">
+                        <h3 className="line-clamp-2 text-xl font-bold text-foreground">
+                          {request.title}
+                        </h3>
 
-                          {request.situationAudio && (
-                            <span className="inline-flex items-center gap-1">
-                              <Volume2
-                                className="size-4 text-emerald-700 dark:text-emerald-400"
+                        <p className="mt-3 line-clamp-4 flex-1 text-sm leading-6 text-muted-foreground">
+                          {request.description}
+                        </p>
+
+                        <div className="mt-5 flex items-start justify-between gap-3 border-t border-border pt-4">
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                              Requested support
+                            </p>
+
+                            <p className="mt-1 break-words text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
+                              {formatAmount(request.requiredAmount)}
+                            </p>
+                          </div>
+
+                          {request.needy?.address && (
+                            <span className="flex max-w-[48%] items-start gap-1 text-xs text-muted-foreground">
+                              <MapPin
+                                className="mt-0.5 size-4 shrink-0"
                                 aria-hidden="true"
                               />
-                              Audio story
+
+                              <span className="line-clamp-2 break-words">
+                                {request.needy.address}
+                              </span>
                             </span>
                           )}
                         </div>
-                      )}
 
-                      <Link
-                        href={`/requests/${encodeURIComponent(request.id)}`}
-                        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:bg-emerald-600 dark:hover:bg-emerald-500"
-                      >
-                        View Request
-                        <ArrowRight
-                          className="size-4 transition-transform group-hover:translate-x-1"
-                          aria-hidden="true"
-                        />
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
+                        {(request.situationVideo ||
+                          request.situationAudio) && (
+                          <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium text-muted-foreground">
+                            {request.situationVideo && (
+                              <span className="inline-flex items-center gap-1">
+                                <Video
+                                  className="size-4 text-emerald-700 dark:text-emerald-400"
+                                  aria-hidden="true"
+                                />
+                                Video story
+                              </span>
+                            )}
+
+                            {request.situationAudio && (
+                              <span className="inline-flex items-center gap-1">
+                                <Volume2
+                                  className="size-4 text-emerald-700 dark:text-emerald-400"
+                                  aria-hidden="true"
+                                />
+                                Audio story
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <Link
+                          href={`/requests/${encodeURIComponent(request.id)}`}
+                          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                        >
+                          View Request
+                          <ArrowRight
+                            className="size-4 transition-transform group-hover:translate-x-1"
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+
+          {/* Pagination */}
+          {!isPending &&
+            !isError &&
+            filteredRequests.length > ITEMS_PER_PAGE && (
+              <nav
+                aria-label="Donation request pagination"
+                className="mt-10 flex flex-wrap items-center justify-center gap-2"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((page) => Math.max(1, page - 1))
+                  }
+                  disabled={safeCurrentPage === 1}
+                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft className="size-4" aria-hidden="true" />
+                  Previous
+                </button>
+
+                {Array.from(
+                  { length: totalPages },
+                  (_, index) => index + 1,
+                ).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    aria-label={`Go to page ${page}`}
+                    aria-current={
+                      safeCurrentPage === page ? "page" : undefined
+                    }
+                    className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-bold transition ${
+                      safeCurrentPage === page
+                        ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-500 dark:bg-emerald-600"
+                        : "border-border bg-card text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((page) =>
+                      Math.min(totalPages, page + 1),
+                    )
+                  }
+                  disabled={safeCurrentPage === totalPages}
+                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                </button>
+              </nav>
+            )}
 
           {/* Refresh status */}
           {!isPending && !isError && isFetching && (
@@ -619,6 +878,7 @@ export default function RequestsPage() {
             aria-hidden="true"
             className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl"
           />
+
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -bottom-28 -right-16 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl"
