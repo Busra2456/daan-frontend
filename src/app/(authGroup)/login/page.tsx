@@ -16,23 +16,23 @@ const features = [
     title: "Reviewed",
     subtitle: "Requests",
     description:
-      "Explore donation requests reviewed by the Daan admin team.",
-    href: "/admin-dashboard/donation-requests/verified",
+      "Learn how Daan reviews donation requests before marking them as verified.",
+    href: "/about",
     icon: ShieldCheck,
   },
   {
     title: "Trusted",
     subtitle: "Giving",
     description:
-      "Visit the donor dashboard to explore opportunities to help.",
-    href: "/donor-dashboard",
+      "Sign in as a donor to explore donation opportunities and available request information.",
+    href: "/login",
     icon: HeartHandshake,
   },
   {
     title: "Together",
     subtitle: "Community",
     description:
-      "Learn how Daan connects people through compassion.",
+      "Discover how Daan connects people who need support with people willing to help.",
     href: "/about",
     icon: Users,
   },
@@ -40,7 +40,7 @@ const features = [
 
 export default function LoginPage() {
   return (
-    <main className="min-h-svh bg-[#f7faf7] text-[#173d2d] lg:grid lg:grid-cols-2">
+    <main className="min-h-svh bg-background text-foreground lg:grid lg:grid-cols-2">
       {/* Left Side: Login */}
       <section className="flex min-h-svh flex-col px-5 py-6 sm:px-8 sm:py-8 lg:px-12 xl:px-20">
         {/* Brand Header */}
@@ -48,7 +48,7 @@ export default function LoginPage() {
           <Link
             href="/"
             aria-label="Back to Daan homepage"
-            className="group inline-flex items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40] focus-visible:ring-offset-4"
+            className="group inline-flex items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
           >
             <Image
               src="/daanlogo.png"
@@ -60,11 +60,11 @@ export default function LoginPage() {
             />
 
             <span className="flex flex-col">
-              <span className="text-2xl font-black leading-none tracking-tight text-[#123c2c]">
-                daan<span className="text-emerald-600">.</span>
+              <span className="text-2xl font-black leading-none tracking-tight text-foreground">
+                daan<span className="text-emerald-600 dark:text-emerald-400">.</span>
               </span>
 
-              <span className="mt-1.5 text-xs font-medium tracking-wide text-[#64746a]">
+              <span className="mt-1.5 text-xs font-medium tracking-wide text-muted-foreground">
                 Donate with Trust
               </span>
             </span>
@@ -72,7 +72,7 @@ export default function LoginPage() {
 
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold text-[#52645a] transition-colors hover:text-[#145c40] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#145c40]"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 dark:hover:text-emerald-400"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Home</span>
@@ -83,38 +83,38 @@ export default function LoginPage() {
         <div className="flex flex-1 items-center justify-center py-12 sm:py-14">
           <div className="w-full max-w-[420px]">
             <div className="mb-8">
-              <div className="mb-5 inline-flex size-12 items-center justify-center rounded-2xl border border-[#dce8df] bg-white text-[#145c40] shadow-sm">
+              <div className="mb-5 inline-flex size-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
                 <HeartHandshake className="size-6" aria-hidden="true" />
               </div>
 
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#218052]">
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-400">
                 Welcome Back
               </p>
 
-              <h1 className="mt-3 text-3xl font-black tracking-tight text-[#123c2c] sm:text-4xl">
+              <h1 className="mt-3 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
                 Good to see you again.
               </h1>
 
-              <p className="mt-3 text-base leading-7 text-[#64746a]">
+              <p className="mt-3 text-base leading-7 text-muted-foreground">
                 Sign in to continue your journey of giving and receiving
                 support through Daan.
               </p>
             </div>
 
             {/* Login Form */}
-            <div className="rounded-2xl border border-[#e0e9e2] bg-white p-5 shadow-[0_12px_40px_rgba(18,60,44,0.05)] transition-shadow duration-300 hover:shadow-[0_16px_45px_rgba(18,60,44,0.08)] sm:p-7">
+            <div className="rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-[0_12px_40px_rgba(18,60,44,0.06)] transition-shadow duration-300 hover:shadow-[0_16px_45px_rgba(18,60,44,0.10)] dark:shadow-black/10 dark:hover:shadow-black/20 sm:p-7">
               <LoginForm />
             </div>
 
             {/* Trust Message */}
-            <div className="mt-6 flex items-start gap-3 rounded-xl border border-[#dce8df] bg-[#edf5ef] p-4">
+            <div className="mt-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/40">
               <ShieldCheck
-                className="mt-0.5 size-5 shrink-0 text-[#218052]"
+                className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-400"
                 aria-hidden="true"
               />
 
-              <p className="text-sm leading-6 text-[#52645a]">
-                <span className="font-bold text-[#173d2d]">
+              <p className="text-sm leading-6 text-muted-foreground">
+                <span className="font-bold text-foreground">
                   Your trust matters.
                 </span>{" "}
                 Daan aims to connect people through reviewed requests
@@ -125,23 +125,25 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <footer className="flex flex-col items-center justify-between gap-2 border-t border-[#dce8df] pt-5 text-center text-xs text-[#64746a] sm:flex-row sm:text-left">
+        <footer className="flex flex-col items-center justify-between gap-2 border-t border-border pt-5 text-center text-xs text-muted-foreground sm:flex-row sm:text-left">
           <p>© {new Date().getFullYear()} Daan. All rights reserved.</p>
 
           <p className="flex items-center gap-1.5">
             Made with
             <Heart
-              className="size-3.5 fill-emerald-600 text-emerald-600"
-              aria-label="love"
+              className="size-3.5 fill-emerald-600 text-emerald-600 dark:fill-emerald-400 dark:text-emerald-400"
+              aria-hidden="true"
             />
-            <span className="font-semibold text-[#145c40]">care</span>
+            <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+              care
+            </span>
             for a kinder world.
           </p>
         </footer>
       </section>
 
       {/* Right Side: Brand Experience */}
-      <aside className="relative hidden overflow-hidden bg-[#123c2c] lg:flex lg:min-h-svh lg:flex-col lg:justify-between">
+      <aside className="relative hidden overflow-hidden bg-emerald-950 lg:flex lg:min-h-svh lg:flex-col lg:justify-between dark:bg-[#071d15]">
         {/* Decorative Background */}
         <div
           aria-hidden="true"
@@ -161,7 +163,10 @@ export default function LoginPage() {
         {/* Top Label */}
         <div className="relative z-10 flex items-center justify-end px-10 py-9 xl:px-14">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-medium text-emerald-100">
-            <span className="size-2 animate-pulse rounded-full bg-emerald-400" />
+            <span
+              aria-hidden="true"
+              className="size-2 animate-pulse rounded-full bg-emerald-400"
+            />
             A community built on trust
           </span>
         </div>
@@ -196,13 +201,13 @@ export default function LoginPage() {
             </span>
           </h2>
 
-          <p className="mt-6 max-w-md text-base leading-8 text-white/70 xl:text-lg">
+          <p className="mt-6 max-w-md text-base leading-8 text-white/80 xl:text-lg">
             Behind every request is a real person with a story. Daan
             helps connect people seeking support with those willing to
             make a difference.
           </p>
 
-          {/* Interactive Feature Cards */}
+          {/* Feature Cards */}
           <div className="mt-10 grid w-full max-w-lg grid-cols-3 gap-3">
             {features.map((feature) => {
               const Icon = feature.icon;
@@ -213,9 +218,9 @@ export default function LoginPage() {
                   href={feature.href}
                   aria-label={`${feature.title} ${feature.subtitle}. ${feature.description}`}
                   title={feature.description}
-                  className="group flex min-w-0 flex-col items-center rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-center backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/[0.12] hover:shadow-lg hover:shadow-emerald-950/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#123c2c] sm:p-4"
+                  className="group flex min-w-0 flex-col items-center rounded-2xl border border-white/15 bg-white/[0.06] p-3 text-center backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/[0.12] hover:shadow-lg hover:shadow-emerald-950/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-950 sm:p-4"
                 >
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-emerald-400/10 transition-colors duration-300 group-hover:bg-emerald-400/20">
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-emerald-400/15 transition-colors duration-300 group-hover:bg-emerald-400/25">
                     <Icon
                       className="size-5 text-emerald-300 transition-transform duration-300 group-hover:scale-110 sm:size-6"
                       aria-hidden="true"
@@ -226,7 +231,7 @@ export default function LoginPage() {
                     {feature.title}
                   </span>
 
-                  <span className="mt-1 text-xs leading-5 text-white/60">
+                  <span className="mt-1 text-xs leading-5 text-white/75">
                     {feature.subtitle}
                   </span>
 
@@ -242,7 +247,7 @@ export default function LoginPage() {
           {/* Learn More */}
           <Link
             href="/about"
-            className="group mt-8 inline-flex items-center gap-2 rounded-lg text-sm font-bold text-emerald-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#123c2c]"
+            className="group mt-8 inline-flex items-center gap-2 rounded-lg text-sm font-bold text-emerald-300 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-emerald-950"
           >
             Learn more about Daan
             <ArrowRight
@@ -253,8 +258,8 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom Note */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/10 px-8 py-6 xl:px-14">
-          <p className="text-xs text-white/50">
+        <div className="relative z-10 flex items-center justify-between border-t border-white/15 px-8 py-6 xl:px-14">
+          <p className="text-xs text-white/70">
             Every person deserves to be heard and helped.
           </p>
 
