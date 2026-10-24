@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import {
   Bot,
+  BrainCircuit,
   HeartHandshake,
   Loader2,
   MessageCircle,
@@ -11,6 +13,8 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+
+type Provider = "openai" | "gemini";
 
 type ChatMessage = {
   id: string;
@@ -25,11 +29,12 @@ const quickQuestions = [
 ];
 
 const welcomeMessage =
-  "Assalamu Alaikum! Welcome to Daan. I'm your AI assistant. I can help you understand how Daan works, submit a request, and learn about the verification process.";
+  "Assalamu Alaikum! Welcome to Daan. I'm your AI assistant. Ask me about donation requests, verification, and how Daan works.";
 
 export default function DaanAIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [provider, setProvider] = useState<Provider>("gemini");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -48,9 +53,7 @@ export default function DaanAIChatbot() {
   }, [messages, isLoading, error]);
 
   useEffect(() => {
-    if (isOpen) {
-      inputRef.current?.focus();
-    }
+    if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
 
   async function sendMessage(text?: string) {
@@ -63,24 +66,29 @@ export default function DaanAIChatbot() {
       return;
     }
 
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: message,
-    };
+    const selectedProvider = provider;
 
-    setMessages((previous) => [...previous, userMessage]);
+    setMessages((previous) => [
+      ...previous,
+      {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: message,
+      },
+    ]);
+
     setInput("");
     setError("");
     setIsLoading(true);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "");
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(
+        /\/+$/,
+        "",
+      );
 
       if (!baseUrl) {
-        throw new Error(
-          "Backend URL is not configured. Please try again later.",
-        );
+        throw new Error("Backend URL is not configured.");
       }
 
       const response = await fetch(`${baseUrl}/api/ai/chat`, {
@@ -89,7 +97,10 @@ export default function DaanAIChatbot() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({
+          message,
+          provider: selectedProvider,
+        }),
       });
 
       const data: {
@@ -98,8 +109,15 @@ export default function DaanAIChatbot() {
       } = await response.json();
 
       if (!response.ok || !data.success || !data.message) {
+        if (response.status === 429) {
+          throw new Error(
+            `${selectedProvider === "gemini" ? "Gemini" : "OpenAI"} quota exceeded. Please try again later or choose the other AI provider.`,
+          );
+        }
+
         throw new Error(
-          data.message || "The assistant could not respond right now.",
+          data.message ||
+            `The ${selectedProvider === "gemini" ? "Gemini" : "OpenAI"} assistant is temporarily unavailable.`,
         );
       }
 
@@ -127,15 +145,13 @@ export default function DaanAIChatbot() {
       {isOpen && (
         <section
           aria-label="Daan AI chat"
-          className="flex h-[min(620px,calc(100dvh-110px))] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
+          className="flex h-[min(650px,calc(100dvh-110px))] w-[min(390px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
         >
-          {/* Header */}
           <header className="flex items-center justify-between gap-3 bg-emerald-700 px-4 py-4 text-white">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
                 <HeartHandshake size={25} />
               </div>
-
               <div className="min-w-0">
                 <h2 className="font-semibold">Daan AI Assistant</h2>
                 <p className="mt-0.5 text-xs text-emerald-100">
@@ -148,11 +164,54 @@ export default function DaanAIChatbot() {
               type="button"
               onClick={() => setIsOpen(false)}
               aria-label="Close chatbot"
-              className="rounded-lg p-2 transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="rounded-lg p-2 transition hover:bg-white/15"
             >
               <X size={20} />
             </button>
           </header>
+
+          {/* AI provider selection */}
+          <div className="border-b border-border bg-background p-3">
+            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+              CHOOSE YOUR AI ASSISTANT
+            </p>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                aria-pressed={provider === "openai"}
+                disabled={isLoading}
+                onClick={() => setProvider("openai")}
+                className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  provider === "openai"
+                    ? "border-emerald-700 bg-emerald-700 text-white"
+                    : "border-border bg-background hover:border-emerald-600"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
+              >
+                <BrainCircuit size={18} />
+                OpenAI
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={provider === "gemini"}
+                disabled={isLoading}
+                onClick={() => setProvider("gemini")}
+                className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  provider === "gemini"
+                    ? "border-emerald-700 bg-emerald-700 text-white"
+                    : "border-border bg-background hover:border-emerald-600"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
+              >
+                <Sparkles size={18} />
+                Gemini
+              </button>
+            </div>
+
+            <p className="mt-2 text-xs text-muted-foreground">
+              Selected: {provider === "openai" ? "OpenAI" : "Gemini"}
+            </p>
+          </div>
 
           {/* Messages */}
           <div
@@ -196,10 +255,9 @@ export default function DaanAIChatbot() {
                 <div className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                   <Bot size={17} />
                 </div>
-
                 <div className="flex items-center gap-2 rounded-2xl border border-border bg-background px-4 py-3 text-sm text-muted-foreground">
                   <Loader2 size={16} className="animate-spin" />
-                  Thinking...
+                  {provider === "gemini" ? "Gemini" : "OpenAI"} is thinking...
                 </div>
               </div>
             )}
@@ -209,9 +267,7 @@ export default function DaanAIChatbot() {
                 role="alert"
                 className="rounded-xl border border-red-500/30 bg-red-500/5 p-3 text-sm"
               >
-                <p className="text-red-700 dark:text-red-300">
-                  {error}
-                </p>
+                <p className="text-red-700 dark:text-red-300">{error}</p>
 
                 <button
                   type="button"
@@ -219,13 +275,13 @@ export default function DaanAIChatbot() {
                   onClick={() => {
                     const lastUserMessage = [...messages]
                       .reverse()
-                      .find((message) => message.role === "user");
+                      .find((item) => item.role === "user");
 
                     if (lastUserMessage) {
                       void sendMessage(lastUserMessage.content);
                     }
                   }}
-                  className="mt-2 inline-flex items-center gap-1.5 font-semibold text-foreground underline underline-offset-4 disabled:opacity-50"
+                  className="mt-2 inline-flex items-center gap-1.5 font-semibold underline underline-offset-4 disabled:opacity-50"
                 >
                   <RotateCcw size={13} />
                   Try again
@@ -238,14 +294,13 @@ export default function DaanAIChatbot() {
                 <p className="text-xs font-semibold text-muted-foreground">
                   QUICK QUESTIONS
                 </p>
-
                 {quickQuestions.map((question) => (
                   <button
                     key={question}
                     type="button"
                     onClick={() => void sendMessage(question)}
-                    className="block w-full rounded-xl border border-border bg-background px-3 py-2.5 text-left text-sm transition hover:border-emerald-600/50 hover:bg-emerald-500/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 disabled:opacity-50"
                     disabled={isLoading}
+                    className="block w-full rounded-xl border border-border bg-background px-3 py-2.5 text-left text-sm transition hover:border-emerald-600/50 hover:bg-emerald-500/5 disabled:opacity-50"
                   >
                     {question}
                   </button>
@@ -279,7 +334,7 @@ export default function DaanAIChatbot() {
                     void sendMessage();
                   }
                 }}
-                placeholder="Ask Daan anything..."
+                placeholder={`Ask ${provider === "gemini" ? "Gemini" : "OpenAI"} about Daan...`}
                 aria-label="Your message"
                 maxLength={2000}
                 rows={1}
@@ -308,7 +363,6 @@ export default function DaanAIChatbot() {
         </section>
       )}
 
-      {/* Floating button */}
       <button
         type="button"
         onClick={() => setIsOpen((previous) => !previous)}
@@ -316,11 +370,7 @@ export default function DaanAIChatbot() {
         aria-expanded={isOpen}
         className="flex size-14 items-center justify-center rounded-full bg-emerald-700 text-white shadow-lg transition hover:scale-105 hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
       >
-        {isOpen ? (
-          <X size={25} />
-        ) : (
-          <MessageCircle size={25} />
-        )}
+        {isOpen ? <X size={25} /> : <MessageCircle size={25} />}
       </button>
     </div>
   );
