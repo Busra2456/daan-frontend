@@ -1,9 +1,9 @@
-
 import { Geist } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { cn } from "@/lib/utils";
 import Providers from "@/providers";
+import DaanAIChatbot from "@/components/ai/daan-ai-chatbot";
 
 import "./globals.css";
 
@@ -24,7 +24,13 @@ export default async function RootLayout({
     >
       <body className="flex min-h-full flex-col font-sans">
         <Toaster position="top-right" richColors />
-        <Providers>{children}</Providers>
+
+        <Providers>
+          {children}
+        </Providers>
+
+        {/* Daan AI Chatbot */}
+        <DaanAIChatbot />
       </body>
     </html>
   );
