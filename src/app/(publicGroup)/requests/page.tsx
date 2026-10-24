@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDownWideNarrow,
@@ -12,7 +13,6 @@ import {
   HeartHandshake,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
   X,
 } from "lucide-react";
 
@@ -57,6 +57,45 @@ function getErrorMessage(error: unknown) {
   return "Something went wrong while loading requests.";
 }
 
+function extractRequests(response: unknown): DonationRequest[] {
+  if (!response || typeof response !== "object") {
+    return [];
+  }
+
+  const result = response as {
+    data?: unknown;
+    requests?: unknown;
+  };
+
+  const payload =
+    result.data !== undefined ? result.data : response;
+
+  if (Array.isArray(payload)) {
+    return payload as DonationRequest[];
+  }
+
+  if (payload && typeof payload === "object") {
+    const nested = payload as {
+      requests?: unknown;
+      data?: unknown;
+    };
+
+    if (Array.isArray(nested.requests)) {
+      return nested.requests as DonationRequest[];
+    }
+
+    if (Array.isArray(nested.data)) {
+      return nested.data as DonationRequest[];
+    }
+  }
+
+  if (Array.isArray(result.requests)) {
+    return result.requests as DonationRequest[];
+  }
+
+  return [];
+}
+
 export default function VerifiedDonationRequestsPage() {
   const [requests, setRequests] = useState<DonationRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,8 +104,8 @@ export default function VerifiedDonationRequestsPage() {
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Load real requests from the existing API.
-  useMemo(() => {
+  // Load real verified requests after the component mounts.
+  useEffect(() => {
     let cancelled = false;
 
     async function loadRequests() {
@@ -76,40 +115,18 @@ export default function VerifiedDonationRequestsPage() {
 
         const response = await getVerifiedDonationRequests();
 
-        // Supports common API response formats without adding fake data.
-        const result = response as unknown as {
-          data?: unknown;
-          requests?: unknown;
-        };
+        if (cancelled) return;
 
-        const payload =
-          result && typeof result === "object" && "data" in result
-            ? result.data
-            : result;
-
-        const list = Array.isArray(payload)
-          ? payload
-          : payload &&
-              typeof payload === "object" &&
-              "requests" in payload &&
-              Array.isArray((payload as { requests: unknown }).requests)
-            ? (payload as { requests: unknown[] }).requests
-            : result &&
-                typeof result === "object" &&
-                "requests" in result &&
-                Array.isArray(result.requests)
-              ? result.requests
-              : [];
-
-        if (!cancelled) {
-          setRequests(list as DonationRequest[]);
-        }
-      } catch (err) {
+        const list = extractRequests(response);
+        setRequests(list);
+      } catch (err: unknown) {
         if (!cancelled) {
           setError(getErrorMessage(err));
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
@@ -124,9 +141,15 @@ export default function VerifiedDonationRequestsPage() {
     const term = search.trim().toLowerCase();
 
     const result = requests.filter((request) => {
-      const text = `${request.title || ""} ${
-        request.description || ""
-      } ${request.category || ""} ${request.location || ""}`.toLowerCase();
+      const text = [
+        request.title,
+        request.description,
+        request.category,
+        request.location,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
       return text.includes(term);
     });
@@ -170,6 +193,20 @@ export default function VerifiedDonationRequestsPage() {
   function updateSort(value: string) {
     setSortBy(value);
     setCurrentPage(1);
+  }
+
+  async function reloadRequests() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getVerifiedDonationRequests();
+      setRequests(extractRequests(response));
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -450,7 +487,7 @@ export default function VerifiedDonationRequestsPage() {
               <p className="mt-2 text-sm text-muted-foreground">{error}</p>
               <button
                 type="button"
-                onClick={() => window.location.reload()}
+                onClick={() => void reloadRequests()}
                 className="mt-5 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
               >
                 Try Again
@@ -489,13 +526,13 @@ export default function VerifiedDonationRequestsPage() {
           ) : (
             <>
               <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {paginatedRequests.map((request) => {
+                {paginatedRequests.map((request, index) => {
                   const id = getRequestId(request);
                   const image = getRequestImage(request);
 
                   return (
                     <article
-                      key={id || `${request.title}-${request.createdAt}`}
+                      key={id || `${request.title}-${request.createdAt}-${index}`}
                       className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl"
                     >
                       <div className="relative h-52 overflow-hidden bg-muted">
@@ -540,8 +577,7 @@ export default function VerifiedDonationRequestsPage() {
                           </p>
                         </div>
 
-                        {(request.situationVideo ||
-                          request.situationAudio) && (
+                        {(request.situationVideo || request.situationAudio) && (
                           <p className="mt-3 text-xs text-muted-foreground">
                             Additional story media available
                           </p>

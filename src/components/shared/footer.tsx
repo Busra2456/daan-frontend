@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -38,30 +37,37 @@ const socialLinks = [
     ),
   },
   {
-    name: "YouTube",
-    href: "https://www.youtube.com/",
+    name: "GitHub",
+    href: "https://github.com/Busra2456",
     path: (
-      <>
-        <path d="M21.6 7.2a2.8 2.8 0 0 0-2-2C17.8 4.7 12 4.7 12 4.7s-5.8 0-7.6.5a2.8 2.8 0 0 0-2 2A29 29 0 0 0 2 12a29 29 0 0 0 .4 4.8 2.8 2.8 0 0 0 2 2c1.8.5 7.6.5 7.6.5s5.8 0 7.6-.5a2.8 2.8 0 0 0 2-2A29 29 0 0 0 22 12a29 29 0 0 0-.4-4.8Z" />
-        <path d="m10 15.3 5.2-3.3L10 8.7v6.6Z" fill="#123C2C" />
-      </>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 .9a11.2 11.2 0 0 0-3.54 21.83c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 .1.77 2.03 3.43 1.54.1-.74.39-1.24.7-1.53-2.5-.29-5.13-1.25-5.13-5.57 0-1.23.44-2.23 1.16-3.02-.12-.29-.5-1.43.11-2.98 0 0 .95-.3 3.08 1.15a10.7 10.7 0 0 1 5.6 0c2.13-1.45 3.07-1.15 3.07-1.15.62 1.55.23 2.69.12 2.98.72.79 1.15 1.79 1.15 3.02 0 4.33-2.63 5.28-5.14 5.56.4.35.75 1.03.75 2.08v3.08c0 .3.2.65.78.54A11.2 11.2 0 0 0 12 .9Z"
+      />
     ),
   },
   {
     name: "LinkedIn",
-    href: "https://www.linkedin.com/",
+    href: "https://www.linkedin.com/in/hasna-hena-busra-586a69428/",
     path: (
-      <>
-        <path d="M6.5 8.5H3.2V21h3.3V8.5ZM4.9 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8ZM21 13.8c0-3.8-2-5.6-4.7-5.6a4.1 4.1 0 0 0-3.7 2V8.5H9.3V21h3.3v-6.2c0-1.6.3-3.2 2.4-3.2s2.1 1.9 2.1 3.3V21h3.3l.6-7.2Z" />
-      </>
+      <path d="M6.5 8.5H3.2V21h3.3V8.5ZM4.9 3a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8ZM21 13.8c0-3.8-2-5.6-4.7-5.6a4.1 4.1 0 0 0-3.7 2V8.5H9.3V21h3.3v-6.2c0-1.6.3-3.2 2.4-3.2s2.1 1.9 2.1 3.3V21h3.3l.6-7.2Z" />
     ),
   },
 ];
 
-function SocialIcon({ name, path }: { name: string; path: React.ReactNode }) {
+function SocialIcon({
+  name,
+  href,
+  path,
+}: {
+  name: string;
+  href: string;
+  path: React.ReactNode;
+}) {
   return (
     <a
-      href={socialLinks.find((item) => item.name === name)?.href}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Visit Daan on ${name}`}
@@ -84,7 +90,6 @@ export function Footer() {
 
   return (
     <footer className="relative isolate overflow-hidden bg-[#123c2c] text-white">
-      {/* Decorative background */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -right-32 -top-40 -z-10 size-[440px] rounded-full bg-emerald-400/[0.09] blur-[100px]"
@@ -95,7 +100,6 @@ export function Footer() {
       />
 
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
-        {/* Main footer */}
         <div className="grid gap-12 py-14 sm:grid-cols-2 sm:py-16 lg:grid-cols-[1.4fr_0.8fr_0.8fr_1.2fr] lg:gap-14 lg:py-20">
           {/* Brand */}
           <div>
@@ -128,7 +132,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Navigation columns */}
+          {/* Navigation */}
           {Object.entries(navigation).map(([heading, links]) => (
             <div key={heading}>
               <h2 className="text-sm font-bold uppercase tracking-[0.16em] text-emerald-300">
@@ -169,6 +173,7 @@ export function Footer() {
               <ArrowUpRight className="size-[18px] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
 
+            {/* Replace with your real contact email */}
             <a
               href="mailto:YOUR_EMAIL@example.com"
               className="mt-6 flex items-center gap-3 text-base text-white/75 transition-colors hover:text-emerald-300"
@@ -181,7 +186,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Social and trust line */}
+        {/* Social links */}
         <div className="flex flex-col gap-6 border-t border-white/10 py-7 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-bold text-white">
@@ -197,6 +202,7 @@ export function Footer() {
               <SocialIcon
                 key={social.name}
                 name={social.name}
+                href={social.href}
                 path={social.path}
               />
             ))}
