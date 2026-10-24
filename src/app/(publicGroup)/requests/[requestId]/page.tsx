@@ -1,342 +1,383 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import { use } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  ArrowRight,
-  HeartHandshake,
-  ShieldCheck,
+  CheckCircle2,
+  Heart,
   MapPin,
-  ImageIcon,
+  RefreshCw,
+  ShieldCheck,
   Video,
   Volume2,
-  AlertCircle,
-  RefreshCw,
-  LockKeyhole,
 } from "lucide-react";
 
 import { getDonationRequestById } from "@/app/(dashboardGroup)/donor-dashboard/_actions/donationRequestActions";
-import { use } from "react";
+import DonationForm from "@/app/(dashboardGroup)/donor-dashboard/_components/DonationForm";
 
-interface NeedyUser {
-  name?: string;
-  imageUrl?: string | null;
-  address?: string | null;
+interface RequestDetailsPageProps {
+  params: Promise<{
+    requestId: string;
+  }>;
 }
 
 interface DonationRequest {
   id: string;
   title: string;
   description: string;
-  requiredAmount: number | string;
+  requiredAmount: string | number;
   status?: string;
+  verificationStatus?: string;
   situationImage?: string | null;
   situationVideo?: string | null;
   situationAudio?: string | null;
-  createdAt?: string;
-  needy?: NeedyUser;
+  needy?: {
+    name?: string | null;
+    address?: string | null;
+    imageUrl?: string | null;
+  } | null;
 }
 
 function extractRequest(response: unknown): DonationRequest {
   let result: unknown = response;
 
-  for (let i = 0; i < 5; i++) {
+  // Handle commonly used API response wrappers.
+  for (let index = 0; index < 5; index++) {
     if (
+      result &&
       typeof result === "object" &&
-      result !== null &&
       "data" in result
     ) {
       result = (result as { data: unknown }).data;
-      continue;
+    } else {
+      break;
     }
-
-    break;
   }
 
   if (
+    !result ||
     typeof result !== "object" ||
-    result === null ||
     !("id" in result) ||
     !("title" in result)
   ) {
-    throw new Error("The server returned an unexpected request response.");
+    throw new Error("Unable to load this donation request.");
   }
 
   return result as DonationRequest;
 }
 
-function formatAmount(amount: number | string) {
-  const value = Number(amount);
+function formatAmount(amount: string | number) {
+  const numericAmount = Number(amount);
 
-  if (!Number.isFinite(value)) return String(amount);
+  if (!Number.isFinite(numericAmount)) {
+    return String(amount);
+  }
 
-  return `৳${value.toLocaleString("en-BD")}`;
-}
-
-function LoadingState() {
-  return (
-    <div className="mx-auto max-w-5xl animate-pulse px-4 py-12 sm:px-6 lg:px-8">
-      <div className="h-5 w-48 rounded bg-muted" />
-      <div className="mt-8 h-10 max-w-md rounded bg-muted" />
-      <div className="mt-4 h-5 max-w-2xl rounded bg-muted" />
-      <div className="mt-8 rounded-3xl border border-border bg-card p-6 sm:p-10">
-        <div className="h-8 max-w-sm rounded bg-muted" />
-        <div className="mt-5 h-32 rounded-xl bg-muted" />
-        <div className="mt-5 h-6 max-w-xs rounded bg-muted" />
-      </div>
-    </div>
-  );
+  return new Intl.NumberFormat("en-BD", {
+    maximumFractionDigits: 2,
+  }).format(numericAmount);
 }
 
 export default function RequestDetailsPage({
   params,
-}: {
-  params: Promise<{ requestId: string }>;
-}) {
+}: RequestDetailsPageProps) {
   const { requestId } = use(params);
 
-  const { data, isPending, isError, error, refetch, isFetching } =
-    useQuery({
-      queryKey: ["donation-request", requestId],
-      queryFn: async () =>
-        extractRequest(await getDonationRequestById(requestId)),
-      enabled: Boolean(requestId),
-      retry: false,
-    });
+  const {
+    data: request,
+    isPending,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ["public-donation-request", requestId],
+    queryFn: async () =>
+      extractRequest(await getDonationRequestById(requestId)),
+    enabled: Boolean(requestId),
+    retry: false,
+  });
 
-  if (isPending) return <LoadingState />;
-
-  if (isError) {
-    const message =
-      error instanceof Error ? error.message : "Unable to load this request.";
-
+  if (isPending) {
     return (
-      <main className="min-h-screen bg-background text-foreground">
-        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-          <Link
-            href="/requests"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-emerald-700 dark:hover:text-emerald-400"
-          >
-            <ArrowLeft className="size-4" />
-            Back to requests
-          </Link>
+      <main className="min-h-screen bg-background">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mb-8 h-5 w-36 animate-pulse rounded bg-muted" />
 
-          <div className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8">
-            <AlertCircle className="size-10 text-destructive" />
-            <h1 className="mt-4 text-2xl font-bold">
-              Unable to load request
-            </h1>
-            <p className="mt-3 text-sm leading-7 text-muted-foreground">
-              {message}
-            </p>
-
-            <p className="mt-2 text-sm text-muted-foreground">
-              Please sign in with an authorized account or check whether this
-              request is still available.
-            </p>
-
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-60"
-              >
-                <RefreshCw
-                  className={`size-4 ${isFetching ? "animate-spin" : ""}`}
-                />
-                Try again
-              </button>
-
-              <Link
-                href="/login"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-bold hover:bg-muted"
-              >
-                <LockKeyhole className="size-4" />
-                Log in
-              </Link>
+          <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+            <div className="space-y-5">
+              <div className="aspect-video animate-pulse rounded-2xl bg-muted" />
+              <div className="h-8 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-24 animate-pulse rounded-xl bg-muted" />
             </div>
+
+            <div className="h-80 animate-pulse rounded-2xl bg-muted" />
           </div>
         </div>
       </main>
     );
   }
 
-  if (!data) return null;
-
-  return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          <Link
-            href="/requests"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-emerald-700 dark:hover:text-emerald-400"
-          >
-            <ArrowLeft className="size-4" />
-            Back to donation requests
-          </Link>
-        </div>
-      </div>
-
-      <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-            <HeartHandshake className="size-4" />
-            Daan • Donate with Trust
+  if (isError || !request) {
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center bg-background px-4 py-12">
+        <div className="w-full max-w-md rounded-2xl border bg-card p-7 text-center shadow-sm">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-destructive/10">
+            <Heart className="size-7 text-destructive" />
           </div>
 
-          <h1 className="mt-5 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {data.title}
+          <h1 className="mt-5 text-xl font-bold">
+            Unable to load this request
           </h1>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-3 py-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
-              <ShieldCheck className="size-4" />
-              Verified request
-            </span>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            {error instanceof Error
+              ? error.message
+              : "This request may be unavailable, or you may not have permission to view it."}
+          </p>
 
-            {data.needy?.address && (
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin className="size-4" />
-                {data.needy.address}
-              </span>
-            )}
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw
+                className={`size-4 ${isFetching ? "animate-spin" : ""}`}
+              />
+              Try again
+            </button>
+
+            <Link
+              href="/requests"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border px-5 py-3 text-sm font-semibold transition-colors hover:bg-muted"
+            >
+              Browse requests
+            </Link>
           </div>
+
+          <p className="mt-5 text-xs leading-5 text-muted-foreground">
+            If this request requires donor access, log in with your donor
+            account and open it from your dashboard.
+          </p>
+
+          <Link
+            href="/login"
+            className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            Log in to Daan
+          </Link>
         </div>
+      </main>
+    );
+  }
 
-        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="h-2 bg-gradient-to-r from-emerald-900 via-emerald-600 to-lime-400" />
+  const isVerified =
+    request.verificationStatus?.toUpperCase() === "VERIFIED" ||
+    request.status?.toUpperCase() === "VERIFIED" ||
+    request.status?.toUpperCase() === "DONATIONS";
 
-          <div className="p-5 sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
-              <div className="min-w-0">
-                <h2 className="text-xl font-bold">About this request</h2>
+  return (
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <Link
+          href="/requests"
+          className="mb-7 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back to requests
+        </Link>
 
-                <p className="mt-4 whitespace-pre-line text-sm leading-8 text-muted-foreground sm:text-base">
-                  {data.description}
-                </p>
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+          {/* Request details */}
+          <section className="min-w-0">
+            {request.situationImage ? (
+              <div className="relative aspect-video overflow-hidden rounded-2xl border bg-muted">
+                <Image
+                  src={request.situationImage}
+                  alt={`Situation related to ${request.title}`}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 700px"
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex aspect-video items-center justify-center rounded-2xl border bg-muted/40">
+                <div className="px-5 text-center">
+                  <Heart className="mx-auto size-10 text-muted-foreground/60" />
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    No situation image provided
+                  </p>
+                </div>
+              </div>
+            )}
 
-                {data.situationImage && (
-                  <div className="mt-7">
-                    <h3 className="mb-3 flex items-center gap-2 font-bold">
-                      <ImageIcon className="size-5 text-emerald-700 dark:text-emerald-400" />
-                      Situation photo
-                    </h3>
-
-                    <div className="relative aspect-video overflow-hidden rounded-2xl border border-border">
-                      <Image
-                        src={data.situationImage}
-                        alt={`Situation related to ${data.title}`}
-                        fill
-                        unoptimized
-                        sizes="(max-width: 768px) 100vw, 700px"
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
+            <div className="mt-7">
+              <div className="flex flex-wrap items-center gap-2">
+                {isVerified ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    <ShieldCheck className="size-4" />
+                    Verified request
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                    <CheckCircle2 className="size-4" />
+                    Request details
+                  </span>
                 )}
-
-                {data.situationVideo && (
-                  <div className="mt-7">
-                    <h3 className="mb-3 flex items-center gap-2 font-bold">
-                      <Video className="size-5 text-emerald-700 dark:text-emerald-400" />
-                      Situation video
-                    </h3>
-
-                    <video
-                      controls
-                      preload="metadata"
-                      className="w-full rounded-2xl border border-border"
-                    >
-                      <source src={data.situationVideo} />
-                      Your browser does not support video playback.
-                    </video>
-                  </div>
-                )}
-
-                {data.situationAudio && (
-                  <div className="mt-7">
-                    <h3 className="mb-3 flex items-center gap-2 font-bold">
-                      <Volume2 className="size-5 text-emerald-700 dark:text-emerald-400" />
-                      Audio message
-                    </h3>
-
-                    <audio
-                      controls
-                      preload="metadata"
-                      className="w-full"
-                    >
-                      <source src={data.situationAudio} />
-                      Your browser does not support audio playback.
-                    </audio>
-                  </div>
-                )}
-
-                {!data.situationImage &&
-                  !data.situationVideo &&
-                  !data.situationAudio && (
-                    <p className="mt-6 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
-                      No situation photo, video, or audio is available for this
-                      request.
-                    </p>
-                  )}
               </div>
 
-              <aside className="h-fit rounded-2xl border border-border bg-muted/40 p-5 sm:p-6">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Amount requested
-                </p>
+              <h1 className="mt-4 break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                {request.title}
+              </h1>
 
-                <p className="mt-2 text-3xl font-extrabold text-emerald-700 dark:text-emerald-400">
-                  {formatAmount(data.requiredAmount)}
-                </p>
-
-                <div className="my-5 border-t border-border" />
-
-                {data.needy?.name && (
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Request submitted by
-                    </p>
-                    <p className="mt-2 font-bold">{data.needy.name}</p>
-                  </div>
+              <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                {request.needy?.name && (
+                  <span>
+                    Shared by{" "}
+                    <span className="font-medium text-foreground">
+                      {request.needy.name}
+                    </span>
+                  </span>
                 )}
 
-                <div className="mt-6 flex items-start gap-2 text-xs leading-6 text-muted-foreground">
-                  <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-700 dark:text-emerald-400" />
-                  Review the available information carefully before deciding
-                  to contribute.
+                {request.needy?.address && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="size-4 shrink-0" />
+                    {request.needy.address}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-7 rounded-2xl border bg-card p-5 sm:p-7">
+                <h2 className="text-lg font-bold">About this situation</h2>
+
+                <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-muted-foreground sm:text-base">
+                  {request.description}
+                </p>
+              </div>
+
+              {(request.situationVideo || request.situationAudio) && (
+                <div className="mt-6 rounded-2xl border bg-card p-5 sm:p-7">
+                  <h2 className="text-lg font-bold">
+                    Situation media
+                  </h2>
+
+                  <div className="mt-4 space-y-5">
+                    {request.situationVideo && (
+                      <div>
+                        <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                          <Video className="size-4" />
+                          Situation video
+                        </p>
+
+                        <video
+                          controls
+                          preload="metadata"
+                          playsInline
+                          className="max-h-[480px] w-full rounded-xl bg-black"
+                        >
+                          <source
+                            src={request.situationVideo}
+                            type="video/mp4"
+                          />
+                          Your browser does not support video playback.
+                        </video>
+                      </div>
+                    )}
+
+                    {request.situationAudio && (
+                      <div>
+                        <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                          <Volume2 className="size-4" />
+                          Voice message
+                        </p>
+
+                        <audio
+                          controls
+                          preload="metadata"
+                          className="w-full"
+                        >
+                          <source src={request.situationAudio} />
+                          Your browser does not support audio playback.
+                        </audio>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                <Link
-                  href="/login"
-                  className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-800"
-                >
-                  Continue to donate
-                  <ArrowRight className="size-4" />
-                </Link>
-              </aside>
+              )}
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-border bg-card p-5">
-          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-400" />
-          <p className="text-sm leading-7 text-muted-foreground">
-            Daan respects the privacy of people seeking assistance. Personal
-            details should only be shared with authorized viewers.
-          </p>
+          {/* Donation panel */}
+          <aside className="lg:sticky lg:top-6">
+            <div className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+              <p className="text-sm font-medium text-muted-foreground">
+                Requested support
+              </p>
+
+              <p className="mt-2 break-words text-3xl font-bold tracking-tight">
+                ৳{formatAmount(request.requiredAmount)}
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Your contribution can help address this person&apos;s needs.
+                Choose an amount that works for you.
+              </p>
+
+              <div className="my-5 border-t" />
+
+              {isVerified ? (
+                <>
+                  <div className="flex items-start gap-3 rounded-xl bg-emerald-500/10 p-3">
+                    <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-400" />
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      This request is marked as verified. Please review the
+                      details before contributing.
+                    </p>
+                  </div>
+
+                  <div className="mt-5">
+                    <h2 className="text-lg font-bold">
+                      Make a donation
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Enter your contribution and select a payment method.
+                    </p>
+
+                    <DonationForm
+                      requestId={request.id}
+                      requiredAmount={String(request.requiredAmount)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-xl bg-muted/60 p-4">
+                  <p className="text-sm font-semibold">
+                    Verification pending
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    Donations are available for verified requests. Please
+                    check back after the review is complete.
+                  </p>
+                </div>
+              )}
+
+              <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">
+                Daan encourages thoughtful giving. Verify the request details
+                and make sure you are comfortable before paying.
+              </p>
+            </div>
+          </aside>
         </div>
-      </section>
+      </div>
     </main>
   );
-}
-
-function requireRequestId(
-  params: Promise<{ requestId: string }>,
-): { requestId: string } {
-  // This helper is replaced below by using React's use() to unwrap params.
-  throw new Error("Use the corrected params implementation below.");
 }
