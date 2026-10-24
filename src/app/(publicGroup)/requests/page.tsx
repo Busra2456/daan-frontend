@@ -1,796 +1,565 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import {
+  ArrowDownWideNarrow,
   ArrowRight,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Heart,
   HeartHandshake,
-  HandHeart,
-  ImageOff,
-  MapPin,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-  Users,
-  Video,
-  Volume2,
   Search,
-  ArrowUpDown,
+  ShieldCheck,
+  SlidersHorizontal,
   X,
 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 
 import { getVerifiedDonationRequests } from "@/api";
 
-const SIX_HOURS = 6 * 60 * 60 * 1000;
-const ITEMS_PER_PAGE = 6;
-
-type SortOption =
-  | "newest"
-  | "oldest"
-  | "amount-low"
-  | "amount-high";
-
-type RequestItem = {
-  id: string;
-  title: string;
-  description: string;
-  requiredAmount: string | number;
-  situationImage?: string | null;
-  situationVideo?: string | null;
-  situationAudio?: string | null;
-  status?: string;
+type DonationRequest = {
+  id?: string;
+  _id?: string;
+  requestId?: string;
+  title?: string;
+  description?: string;
+  requiredAmount?: number | string;
+  situationImage?: string;
+  situationVideo?: string;
+  situationAudio?: string;
   createdAt?: string;
-  needy?: {
-    name?: string;
-    imageUrl?: string | null;
-    address?: string | null;
-  };
+  verificationStatus?: string;
+  status?: string;
+  category?: string;
+  location?: string;
 };
 
-const trustFeatures = [
-  {
-    icon: ShieldCheck,
-    title: "Verified Requests",
-    description:
-      "Every request goes through an admin review before being shared with donors.",
-    color:
-      "bg-emerald-100 text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-300",
-  },
-  {
-    icon: Users,
-    title: "Understand Their Story",
-    description:
-      "Learn about a person's circumstances and needs before deciding how to help.",
-    color:
-      "bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-300",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Give With Confidence",
-    description:
-      "Make thoughtful giving decisions based on the verified information available.",
-    color:
-      "bg-green-100 text-green-800 dark:bg-green-400/15 dark:text-green-300",
-  },
-];
+const PAGE_SIZE = 6;
 
-function extractRequests(response: unknown): RequestItem[] {
-  let current: unknown = response;
+const money = (amount: number | string | undefined) =>
+  new Intl.NumberFormat("en-BD", {
+    style: "currency",
+    currency: "BDT",
+    maximumFractionDigits: 0,
+  }).format(Number(amount) || 0);
 
-  for (let i = 0; i < 5; i++) {
-    if (Array.isArray(current)) {
-      return current as RequestItem[];
-    }
-
-    if (
-      current !== null &&
-      typeof current === "object" &&
-      "data" in current
-    ) {
-      current = current.data;
-      continue;
-    }
-
-    break;
-  }
-
-  if (Array.isArray(current)) {
-    return current as RequestItem[];
-  }
-
-  throw new Error("Unexpected verified requests API response.");
+function getRequestId(request: DonationRequest) {
+  return request.id || request._id || request.requestId || "";
 }
 
-function RequestCardSkeleton() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="aspect-[16/10] animate-pulse bg-muted" />
-
-      <div className="space-y-4 p-5">
-        <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
-        <div className="h-4 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
-        <div className="h-10 animate-pulse rounded-xl bg-muted" />
-      </div>
-    </div>
-  );
+function getRequestImage(request: DonationRequest) {
+  return request.situationImage || "";
 }
 
-function formatAmount(amount: string | number) {
-  const value = Number(amount);
-
-  if (!Number.isFinite(value)) {
-    return "Amount unavailable";
-  }
-
-  return `৳${value.toLocaleString("en-BD")}`;
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  return "Something went wrong while loading requests.";
 }
 
-function getAmount(request: RequestItem) {
-  const amount = Number(request.requiredAmount);
-  return Number.isFinite(amount) ? amount : 0;
-}
-
-function getTimestamp(request: RequestItem) {
-  if (!request.createdAt) {
-    return 0;
-  }
-
-  const timestamp = new Date(request.createdAt).getTime();
-
-  return Number.isFinite(timestamp) ? timestamp : 0;
-}
-
-export default function RequestsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
+export default function VerifiedDonationRequestsPage() {
+  const [requests, setRequests] = useState<DonationRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const {
-    data: requests = [],
-    isPending,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ["verified-donation-requests"],
-    queryFn: async () => {
-      const response = await getVerifiedDonationRequests();
-      const items = extractRequests(response);
+  // Load real requests from the existing API.
+  useMemo(() => {
+    let cancelled = false;
 
-      return items
-        .filter(
-          (item) =>
-            item &&
-            typeof item.id === "string" &&
-            typeof item.title === "string",
-        )
-        .sort((a, b) => getTimestamp(b) - getTimestamp(a));
-    },
-    staleTime: SIX_HOURS,
-    refetchInterval: SIX_HOURS,
-    refetchIntervalInBackground: true,
-  });
+    async function loadRequests() {
+      try {
+        setLoading(true);
+        setError("");
 
-  // Search and sort the verified requests returned by the API.
-  const filteredRequests = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+        const response = await getVerifiedDonationRequests();
 
-    const filtered = requests.filter((request) => {
-      if (!query) {
-        return true;
+        // Supports common API response formats without adding fake data.
+        const result = response as unknown as {
+          data?: unknown;
+          requests?: unknown;
+        };
+
+        const payload =
+          result && typeof result === "object" && "data" in result
+            ? result.data
+            : result;
+
+        const list = Array.isArray(payload)
+          ? payload
+          : payload &&
+              typeof payload === "object" &&
+              "requests" in payload &&
+              Array.isArray((payload as { requests: unknown }).requests)
+            ? (payload as { requests: unknown[] }).requests
+            : result &&
+                typeof result === "object" &&
+                "requests" in result &&
+                Array.isArray(result.requests)
+              ? result.requests
+              : [];
+
+        if (!cancelled) {
+          setRequests(list as DonationRequest[]);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(getErrorMessage(err));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
+    }
 
-      return (
-        request.title.toLowerCase().includes(query) ||
-        request.description.toLowerCase().includes(query)
-      );
+    void loadRequests();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredRequests = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
+    const result = requests.filter((request) => {
+      const text = `${request.title || ""} ${
+        request.description || ""
+      } ${request.category || ""} ${request.location || ""}`.toLowerCase();
+
+      return text.includes(term);
     });
 
-    return [...filtered].sort((a, b) => {
+    return result.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      const amountA = Number(a.requiredAmount) || 0;
+      const amountB = Number(b.requiredAmount) || 0;
+
       switch (sortBy) {
         case "oldest":
-          return getTimestamp(a) - getTimestamp(b);
-
+          return dateA - dateB;
         case "amount-low":
-          return getAmount(a) - getAmount(b);
-
+          return amountA - amountB;
         case "amount-high":
-          return getAmount(b) - getAmount(a);
-
+          return amountB - amountA;
         default:
-          return getTimestamp(b) - getTimestamp(a);
+          return dateB - dateA;
       }
     });
-  }, [requests, searchQuery, sortBy]);
+  }, [requests, search, sortBy]);
 
-  const totalPages = Math.ceil(
-    filteredRequests.length / ITEMS_PER_PAGE,
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredRequests.length / PAGE_SIZE),
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    Math.max(totalPages, 1),
-  );
+  const safePage = Math.min(currentPage, totalPages);
 
   const paginatedRequests = filteredRequests.slice(
-    (safeCurrentPage - 1) * ITEMS_PER_PAGE,
-    safeCurrentPage * ITEMS_PER_PAGE,
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE,
   );
 
-  function handleSearch(value: string) {
-    setSearchQuery(value);
+  function updateSearch(value: string) {
+    setSearch(value);
     setCurrentPage(1);
   }
 
-  function handleSort(value: SortOption) {
+  function updateSort(value: string) {
     setSortBy(value);
     setCurrentPage(1);
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-background text-foreground transition-colors duration-300">
+    <main className="min-h-screen bg-background text-foreground">
       {/* Hero */}
-      <section className="relative isolate overflow-hidden px-5 pb-16 pt-12 sm:px-8 sm:pb-24 sm:pt-20">
+      <section className="relative isolate overflow-hidden border-b bg-gradient-to-br from-emerald-50 via-background to-teal-50 dark:from-emerald-950/40 dark:via-background dark:to-teal-950/20">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-28 -top-20 -z-10 h-80 w-80 rounded-full bg-emerald-400/15 blur-3xl"
+          className="pointer-events-none absolute -right-24 -top-24 -z-10 size-96 rounded-full bg-emerald-500/10 blur-3xl"
         />
-
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-20 -left-28 -z-10 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-32 -left-24 -z-10 size-80 rounded-full bg-teal-500/10 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-7xl">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-            <div className="text-center lg:text-left">
-              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-800 dark:text-emerald-300 lg:mx-0">
-                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                Verified Donation Requests
-              </div>
-
-              <h1 className="mx-auto mt-7 max-w-3xl text-4xl font-extrabold leading-[1.12] tracking-tight text-foreground sm:text-5xl lg:mx-0 lg:text-6xl">
-                Your kindness can{" "}
-                <span className="relative inline-block text-emerald-700 dark:text-emerald-400">
-                  change a life.
-                  <span
-                    aria-hidden="true"
-                    className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-amber-400/70"
-                  />
-                </span>
-              </h1>
-
-              <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg lg:mx-0">
-                Behind every request is a person, a family, and a story that
-                deserves to be heard. Daan helps connect people in need with
-                donors who want to make a meaningful difference.
-              </p>
-
-              <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
-                <Link
-                  href="/login"
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-7 py-4 text-sm font-bold text-primary-foreground shadow-lg shadow-emerald-950/10 transition duration-300 hover:-translate-y-1 hover:opacity-90 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                >
-                  <Heart className="h-5 w-5" aria-hidden="true" />
-                  Login as Donor
-                  <ArrowRight
-                    className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
-                </Link>
-
-                <Link
-                  href="/how-it-works"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-7 py-4 text-sm font-bold text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/50 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                >
-                  Discover How It Works
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
-
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-muted-foreground lg:justify-start">
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2
-                    className="h-4 w-4 shrink-0 text-emerald-700 dark:text-emerald-400"
-                    aria-hidden="true"
-                  />
-                  Admin-reviewed requests
-                </span>
-
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2
-                    className="h-4 w-4 shrink-0 text-emerald-700 dark:text-emerald-400"
-                    aria-hidden="true"
-                  />
-                  Informed giving
-                </span>
-              </div>
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-2 lg:gap-14 lg:px-12 lg:py-24">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+              <HeartHandshake size={17} aria-hidden="true" />
+              DAAN — DONATE WITH TRUST
             </div>
 
-            {/* Daan brand illustration */}
-            <div className="relative mx-auto w-full max-w-md">
-              <div
-                aria-hidden="true"
-                className="absolute -right-3 top-8 h-24 w-24 rounded-full bg-amber-400/25 blur-2xl sm:-right-6"
-              />
+            <h1 className="mt-6 max-w-2xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              Your kindness can{" "}
+              <span className="text-emerald-600 dark:text-emerald-400">
+                change a life.
+              </span>
+            </h1>
 
-              <div
-                aria-hidden="true"
-                className="absolute -bottom-4 -left-3 h-28 w-28 rounded-full bg-emerald-400/20 blur-2xl"
-              />
+            <p className="mt-6 max-w-xl text-base leading-8 text-muted-foreground sm:text-lg">
+              Behind every request is a person or family facing a real
+              challenge. Explore admin-reviewed requests, understand
+              their circumstances, and decide how you can help.
+            </p>
 
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-gradient-to-br from-emerald-950 via-emerald-800 to-emerald-600 p-7 text-white shadow-2xl shadow-emerald-950/15 dark:from-[#071f17] dark:via-emerald-950 dark:to-emerald-800 sm:p-10">
-                <div
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="#verified-requests"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+              >
+                Explore Verified Requests
+                <ArrowRight size={18} aria-hidden="true" />
+              </a>
+
+              <Link
+                href="/how-it-works"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background/80 px-6 py-3.5 font-semibold transition hover:bg-muted"
+              >
+                How Daan Works
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <ShieldCheck
+                  size={18}
+                  className="text-emerald-600"
                   aria-hidden="true"
-                  className="absolute -right-14 -top-14 h-48 w-48 rounded-full border border-white/10"
                 />
-
-                <div
+                Admin-reviewed requests
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Heart
+                  size={18}
+                  className="text-emerald-600"
                   aria-hidden="true"
-                  className="absolute -right-5 -top-5 h-32 w-32 rounded-full border border-white/10"
                 />
+                Informed giving
+              </span>
+            </div>
+          </div>
 
-                <div className="relative flex min-h-[310px] flex-col justify-between sm:min-h-[340px]">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-amber-300 ring-1 ring-white/20">
-                      <HandHeart className="h-7 w-7" aria-hidden="true" />
-                    </div>
+          <div className="relative">
+            <div className="overflow-hidden rounded-3xl border border-emerald-900/10 bg-background p-2 shadow-xl shadow-emerald-950/10">
+              <div className="relative min-h-[300px] overflow-hidden rounded-2xl bg-emerald-900 sm:min-h-[400px]">
+                <img
+                  src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85"
+                  alt="Community members supporting children"
+                  className="absolute inset-0 size-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-emerald-950/10 to-transparent" />
 
-                    <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-center text-xs font-semibold tracking-wide text-white">
-                      THE DAAN PROMISE
-                    </span>
-                  </div>
-
-                  <div className="py-8">
-                    <div className="mb-5 flex items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-300 text-emerald-950">
-                        <Heart
-                          className="h-6 w-6 fill-current"
-                          aria-hidden="true"
-                        />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-medium text-emerald-100">
-                          A little help
-                        </p>
-                        <p className="text-lg font-bold text-white">
-                          Can mean everything.
-                        </p>
-                      </div>
-                    </div>
-
-                    <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
-                      Give with trust.
-                      <br />
-                      <span className="text-amber-300">
-                        Help with heart.
-                      </span>
-                    </h2>
-
-                    <p className="mt-4 max-w-xs text-sm leading-7 text-emerald-50">
-                      Every person deserves dignity, compassion, and the chance
-                      to be heard.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3 border-t border-white/20 pt-5">
-                    <div className="flex -space-x-2">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-800 bg-amber-200 text-emerald-950 dark:border-emerald-950">
-                        <Heart className="h-4 w-4" aria-hidden="true" />
-                      </span>
-
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-800 bg-emerald-100 text-emerald-900 dark:border-emerald-950">
-                        <HandHeart className="h-4 w-4" aria-hidden="true" />
-                      </span>
-
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-800 bg-white text-emerald-900 dark:border-emerald-950">
-                        <Users className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                    </div>
-
-                    <p className="text-xs leading-5 text-emerald-50">
-                      <span className="block font-bold text-white">
-                        People helping people
-                      </span>
-                      A community built on compassion
-                    </p>
-
-                    <Sparkles
-                      className="ml-auto h-5 w-5 shrink-0 text-amber-300"
-                      aria-hidden="true"
-                    />
-                  </div>
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-8">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-200">
+                    THE DAAN PROMISE
+                  </p>
+                  <h2 className="mt-3 max-w-md text-3xl font-bold leading-tight sm:text-4xl">
+                    A little help can mean everything.
+                  </h2>
+                  <p className="mt-3 max-w-md leading-7 text-white/85">
+                    Give with trust. Help with heart. Respect every
+                    person&apos;s dignity.
+                  </p>
                 </div>
               </div>
             </div>
+
+            <div className="absolute -bottom-5 -left-3 hidden items-center gap-3 rounded-2xl border border-border bg-background p-4 shadow-lg sm:flex">
+              <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                <ShieldCheck size={24} aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-semibold">Giving starts with trust.</p>
+                <p className="text-xs text-muted-foreground">
+                  Review the available information
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Trust features */}
-      <section className="border-y border-border bg-card px-5 py-16 text-card-foreground transition-colors duration-300 sm:px-8 sm:py-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-300">
-              Why Daan?
-            </p>
+      {/* How Daan works */}
+      <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-600">
+            SIMPLE. THOUGHTFUL. TRANSPARENT.
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Every act of giving starts with understanding.
+          </h2>
+          <p className="mt-4 leading-7 text-muted-foreground">
+            Daan brings people who need help closer to people who want
+            to give, with an admin review step before requests are
+            presented as verified.
+          </p>
+        </div>
 
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              Giving starts with trust.
-            </h2>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {[
+            {
+              number: "01",
+              title: "Submit a Request",
+              description:
+                "A person in need shares their circumstances and explains what support they require.",
+              icon: HeartHandshake,
+            },
+            {
+              number: "02",
+              title: "Admin Verification",
+              description:
+                "An administrator reviews the request before it is presented to donors as verified.",
+              icon: ShieldCheck,
+            },
+            {
+              number: "03",
+              title: "Give With Care",
+              description:
+                "Donors review the available information and decide whether they want to contribute.",
+              icon: Heart,
+            },
+          ].map((step) => {
+            const Icon = step.icon;
 
-            <p className="mt-4 leading-7 text-muted-foreground">
-              Helping someone is a meaningful decision. We want you to make it
-              with care, clarity, and confidence.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {trustFeatures.map((feature, index) => {
-              const Icon = feature.icon;
-
-              return (
-                <article
-                  key={feature.title}
-                  className="group rounded-2xl border border-border bg-background p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-950/5 sm:p-8"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div
-                      className={`flex h-14 w-14 items-center justify-center rounded-2xl ${feature.color} transition duration-300 group-hover:scale-110`}
-                    >
-                      <Icon className="h-7 w-7" aria-hidden="true" />
-                    </div>
-
-                    <span className="text-4xl font-black text-muted-foreground/40">
-                      0{index + 1}
-                    </span>
+            return (
+              <article
+                key={step.number}
+                className="rounded-2xl border border-border bg-card p-6 transition hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold tracking-widest text-emerald-600">
+                    {step.number}
+                  </span>
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <Icon size={24} aria-hidden="true" />
                   </div>
-
-                  <h3 className="mt-7 text-xl font-bold text-foreground">
-                    {feature.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                    {feature.description}
-                  </p>
-
-                  <div className="mt-6 h-1 w-12 rounded-full bg-emerald-600 transition-all duration-300 group-hover:w-20 dark:bg-emerald-400" />
-                </article>
-              );
-            })}
-          </div>
+                </div>
+                <h3 className="mt-5 text-xl font-bold">{step.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                  {step.description}
+                </p>
+              </article>
+            );
+          })}
         </div>
       </section>
 
-      {/* Verified requests listing */}
+      {/* Verified requests */}
       <section
         id="verified-requests"
-        className="px-5 py-16 sm:px-8 sm:py-20 lg:px-12"
+        className="scroll-mt-20 border-y bg-muted/30"
       >
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                <ShieldCheck className="size-4" aria-hidden="true" />
-                Admin-Verified Requests
+        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                <CheckCircle2 size={15} aria-hidden="true" />
+                ADMIN-REVIEWED REQUESTS
               </div>
-
-              <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                Real Needs. Meaningful Support.
+              <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                Verified Donation Requests
               </h2>
-
-              <p className="mt-4 leading-7 text-muted-foreground">
-                Explore the requests returned by Daan and take time to
-                understand each person&apos;s circumstances before deciding how
-                to help.
-              </p>
-
-              <p className="mt-3 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                Requests refresh automatically every 6 hours.
+              <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">
+                Read each story, understand the need, and choose how
+                you would like to make a difference.
               </p>
             </div>
 
-            {!isPending && !isError && requests.length > 0 && (
-              <span className="inline-flex w-fit shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-card-foreground">
-                <Heart className="size-4 text-emerald-600 dark:text-emerald-400" />
-                {filteredRequests.length} matching{" "}
-                {filteredRequests.length === 1 ? "request" : "requests"}
-              </span>
+            {!loading && !error && (
+              <p className="text-sm text-muted-foreground">
+                {filteredRequests.length}{" "}
+                {filteredRequests.length === 1 ? "request" : "requests"}{" "}
+                found
+              </p>
             )}
           </div>
 
-          {/* Search and sort controls */}
-          {!isPending && !isError && requests.length > 0 && (
-            <div className="mb-8 space-y-4">
-              <div className="grid gap-4 md:grid-cols-[1fr_280px]">
-                <div className="relative">
-                  <Search
-                    className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-
-                  <input
-                    type="search"
-                    value={searchQuery}
-                    onChange={(event) => handleSearch(event.target.value)}
-                    placeholder="Search by request title or description..."
-                    aria-label="Search donation requests"
-                    className="h-12 w-full rounded-xl border border-border bg-card pl-12 pr-11 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
-                  />
-
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => handleSearch("")}
-                      aria-label="Clear search"
-                      className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                    >
-                      <X className="size-4" aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-
-                <div className="relative">
-                  <ArrowUpDown
-                    className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-emerald-700 dark:text-emerald-400"
-                    aria-hidden="true"
-                  />
-
-                  <select
-                    value={sortBy}
-                    onChange={(event) =>
-                      handleSort(event.target.value as SortOption)
-                    }
-                    aria-label="Sort donation requests"
-                    className="h-12 w-full appearance-none rounded-xl border border-border bg-card pl-11 pr-4 text-sm font-medium text-foreground outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
-                  >
-                    <option value="newest">Newest first</option>
-                    <option value="oldest">Oldest first</option>
-                    <option value="amount-low">Amount: Low to High</option>
-                    <option value="amount-high">Amount: High to Low</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-                <p aria-live="polite">
-                  Showing{" "}
-                  <span className="font-semibold text-foreground">
-                    {filteredRequests.length === 0
-                      ? 0
-                      : (safeCurrentPage - 1) * ITEMS_PER_PAGE + 1}
-                    {"–"}
-                    {Math.min(
-                      safeCurrentPage * ITEMS_PER_PAGE,
-                      filteredRequests.length,
-                    )}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-semibold text-foreground">
-                    {filteredRequests.length}
-                  </span>{" "}
-                  matching requests
-                </p>
-
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => handleSearch("")}
-                    className="font-semibold text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-400"
-                  >
-                    Clear search
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Loading */}
-          {isPending && (
-            <div
-              className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              aria-label="Loading verified requests"
-            >
-              {[1, 2, 3, 4, 5, 6].map((item) => (
-                <RequestCardSkeleton key={item} />
-              ))}
-            </div>
-          )}
-
-          {/* Error */}
-          {isError && (
-            <div className="rounded-2xl border border-red-200 bg-card px-6 py-12 text-center dark:border-red-900">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400">
-                <RefreshCw className="size-7" aria-hidden="true" />
-              </div>
-
-              <h3 className="mt-5 text-lg font-bold text-foreground">
-                We couldn&apos;t load verified requests.
-              </h3>
-
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                Please check your connection and try again.
-              </p>
-
-              {error instanceof Error && (
-                <p className="mx-auto mt-3 max-w-xl break-words text-xs text-red-600 dark:text-red-400">
-                  {error.message}
-                </p>
-              )}
-
-              <button
-                type="button"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-              >
-                <RefreshCw
-                  className={`size-4 ${isFetching ? "animate-spin" : ""}`}
-                  aria-hidden="true"
-                />
-                {isFetching ? "Refreshing..." : "Try Again"}
-              </button>
-            </div>
-          )}
-
-          {/* No requests from the API */}
-          {!isPending && !isError && requests.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
-              <Heart className="mx-auto size-10 text-emerald-600 dark:text-emerald-400" />
-
-              <h3 className="mt-4 text-xl font-bold text-foreground">
-                No verified requests yet
-              </h3>
-
-              <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
-                There are no verified donation requests available right now.
-                Please check back later.
-              </p>
-            </div>
-          )}
-
-          {/* Search returned no results */}
-          {!isPending &&
-            !isError &&
-            requests.length > 0 &&
-            filteredRequests.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
-                <Search className="mx-auto size-10 text-muted-foreground" />
-
-                <h3 className="mt-4 text-xl font-bold text-foreground">
-                  No matching requests
-                </h3>
-
-                <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
-                  Try another keyword to find a verified donation request.
-                </p>
-
+          {/* Search and sort */}
+          <div className="mt-8 grid gap-3 rounded-2xl border border-border bg-background p-4 sm:p-5 md:grid-cols-[1fr_240px]">
+            <div className="relative">
+              <Search
+                size={19}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => updateSearch(event.target.value)}
+                placeholder="Search by title, story, category or location..."
+                aria-label="Search donation requests"
+                className="h-12 w-full rounded-xl border border-input bg-background pl-11 pr-11 text-sm outline-none transition placeholder:text-muted-foreground focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+              />
+              {search && (
                 <button
                   type="button"
-                  onClick={() => handleSearch("")}
-                  className="mt-5 rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                  onClick={() => updateSearch("")}
+                  aria-label="Clear search"
+                  className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
+                  <X size={17} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+
+            <div className="relative">
+              <ArrowDownWideNarrow
+                size={18}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <select
+                value={sortBy}
+                onChange={(event) => updateSort(event.target.value)}
+                aria-label="Sort donation requests"
+                className="h-12 w-full appearance-none rounded-xl border border-input bg-background pl-10 pr-4 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/15"
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="amount-low">Amount: Low to high</option>
+                <option value="amount-high">Amount: High to low</option>
+              </select>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-2xl border border-border bg-card"
+                >
+                  <div className="h-52 animate-pulse bg-muted" />
+                  <div className="space-y-4 p-5">
+                    <div className="h-5 w-3/4 animate-pulse rounded bg-muted" />
+                    <div className="h-4 w-full animate-pulse rounded bg-muted" />
+                    <div className="h-4 w-5/6 animate-pulse rounded bg-muted" />
+                    <div className="h-10 animate-pulse rounded-xl bg-muted" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="mt-8 rounded-2xl border border-destructive/30 bg-background px-6 py-10 text-center">
+              <p className="text-lg font-semibold">
+                We couldn&apos;t load donation requests.
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="mt-5 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : paginatedRequests.length === 0 ? (
+            <div className="mt-8 rounded-2xl border border-dashed border-border bg-background px-6 py-14 text-center">
+              <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+                {search ? (
+                  <Search size={26} aria-hidden="true" />
+                ) : (
+                  <HeartHandshake size={26} aria-hidden="true" />
+                )}
+              </div>
+              <h3 className="mt-5 text-xl font-bold">
+                {search
+                  ? "No matching requests found"
+                  : "No verified requests available yet"}
+              </h3>
+              <p className="mx-auto mt-2 max-w-lg leading-7 text-muted-foreground">
+                {search
+                  ? "Try a different keyword to find a request."
+                  : "When requests have been reviewed and verified by an administrator, they will appear here."}
+              </p>
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => updateSearch("")}
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border px-5 py-3 font-semibold transition hover:bg-muted"
+                >
+                  <X size={17} aria-hidden="true" />
                   Clear Search
                 </button>
-              </div>
-            )}
-
-          {/* Request cards */}
-          {!isPending &&
-            !isError &&
-            paginatedRequests.length > 0 && (
-              <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {paginatedRequests.map((request) => {
-                  const imageUrl =
-                    request.situationImage || request.needy?.imageUrl;
+                  const id = getRequestId(request);
+                  const image = getRequestImage(request);
 
                   return (
                     <article
-                      key={request.id}
-                      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl"
+                      key={id || `${request.title}-${request.createdAt}`}
+                      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-xl"
                     >
-                      {/* Request image */}
-                      <div className="relative aspect-[16/10] overflow-hidden bg-emerald-50 dark:bg-emerald-950/30">
-                        {imageUrl ? (
-                          <Image
-                            src={imageUrl}
-                            alt={`Situation for ${request.title}`}
-                            fill
-                            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      <div className="relative h-52 overflow-hidden bg-muted">
+                        {image ? (
+                          <img
+                            src={image}
+                            alt={request.title || "Donation request"}
+                            loading="lazy"
+                            className="size-full object-cover transition duration-500 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-emerald-100 to-slate-200 text-emerald-800 dark:from-emerald-950 dark:to-slate-900 dark:text-emerald-300">
-                            <ImageOff className="size-10" aria-hidden="true" />
-                            <span className="text-xs font-medium">
-                              No image available
+                          <div className="flex size-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-800 dark:from-emerald-950 dark:to-teal-950 dark:text-emerald-200">
+                            <HeartHandshake size={42} aria-hidden="true" />
+                            <span className="text-sm font-medium">
+                              Every story matters
                             </span>
                           </div>
                         )}
 
-                        <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/95 px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-sm dark:border-emerald-900 dark:bg-slate-950/90 dark:text-emerald-300">
-                          <ShieldCheck className="size-4" aria-hidden="true" />
+                        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-background/95 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm dark:text-emerald-300">
+                          <ShieldCheck size={14} aria-hidden="true" />
                           Verified
-                        </span>
+                        </div>
                       </div>
 
-                      {/* Request details */}
                       <div className="flex flex-1 flex-col p-5">
-                        <h3 className="line-clamp-2 text-xl font-bold text-foreground">
-                          {request.title}
+                        <h3 className="line-clamp-2 text-xl font-bold leading-snug">
+                          {request.title || "Donation request"}
                         </h3>
 
-                        <p className="mt-3 line-clamp-4 flex-1 text-sm leading-6 text-muted-foreground">
-                          {request.description}
+                        <p className="mt-3 line-clamp-3 flex-1 text-sm leading-7 text-muted-foreground">
+                          {request.description ||
+                            "Please view the request details to learn more about this situation."}
                         </p>
 
-                        <div className="mt-5 flex items-start justify-between gap-3 border-t border-border pt-4">
-                          <div className="min-w-0">
-                            <p className="text-xs text-muted-foreground">
-                              Requested support
-                            </p>
-
-                            <p className="mt-1 break-words text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
-                              {formatAmount(request.requiredAmount)}
-                            </p>
-                          </div>
-
-                          {request.needy?.address && (
-                            <span className="flex max-w-[48%] items-start gap-1 text-xs text-muted-foreground">
-                              <MapPin
-                                className="mt-0.5 size-4 shrink-0"
-                                aria-hidden="true"
-                              />
-
-                              <span className="line-clamp-2 break-words">
-                                {request.needy.address}
-                              </span>
-                            </span>
-                          )}
+                        <div className="mt-5 rounded-xl bg-emerald-500/5 p-4">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Requested support
+                          </p>
+                          <p className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                            {money(request.requiredAmount)}
+                          </p>
                         </div>
 
                         {(request.situationVideo ||
                           request.situationAudio) && (
-                          <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium text-muted-foreground">
-                            {request.situationVideo && (
-                              <span className="inline-flex items-center gap-1">
-                                <Video
-                                  className="size-4 text-emerald-700 dark:text-emerald-400"
-                                  aria-hidden="true"
-                                />
-                                Video story
-                              </span>
-                            )}
-
-                            {request.situationAudio && (
-                              <span className="inline-flex items-center gap-1">
-                                <Volume2
-                                  className="size-4 text-emerald-700 dark:text-emerald-400"
-                                  aria-hidden="true"
-                                />
-                                Audio story
-                              </span>
-                            )}
-                          </div>
+                          <p className="mt-3 text-xs text-muted-foreground">
+                            Additional story media available
+                          </p>
                         )}
 
                         <Link
-                          href={`/requests/${encodeURIComponent(request.id)}`}
-                          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white transition hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                          href={
+                            id
+                              ? `/requests/${encodeURIComponent(id)}`
+                              : "/login"
+                          }
+                          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
                         >
                           View Request
                           <ArrowRight
-                            className="size-4 transition-transform group-hover:translate-x-1"
+                            size={17}
                             aria-hidden="true"
+                            className="transition-transform group-hover:translate-x-1"
                           />
                         </Link>
                       </div>
@@ -798,118 +567,143 @@ export default function RequestsPage() {
                   );
                 })}
               </div>
-            )}
 
-          {/* Pagination */}
-          {!isPending &&
-            !isError &&
-            filteredRequests.length > ITEMS_PER_PAGE && (
-              <nav
-                aria-label="Donation request pagination"
-                className="mt-10 flex flex-wrap items-center justify-center gap-2"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCurrentPage((page) => Math.max(1, page - 1))
-                  }
-                  disabled={safeCurrentPage === 1}
-                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <nav
+                  aria-label="Donation request pagination"
+                  className="mt-10 flex flex-wrap items-center justify-center gap-2"
                 >
-                  <ChevronLeft className="size-4" aria-hidden="true" />
-                  Previous
-                </button>
-
-                {Array.from(
-                  { length: totalPages },
-                  (_, index) => index + 1,
-                ).map((page) => (
                   <button
-                    key={page}
                     type="button"
-                    onClick={() => setCurrentPage(page)}
-                    aria-label={`Go to page ${page}`}
-                    aria-current={
-                      safeCurrentPage === page ? "page" : undefined
+                    disabled={safePage === 1}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(1, page - 1))
                     }
-                    className={`h-10 min-w-10 rounded-xl border px-3 text-sm font-bold transition ${
-                      safeCurrentPage === page
-                        ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-500 dark:bg-emerald-600"
-                        : "border-border bg-card text-foreground hover:bg-accent"
-                    }`}
+                    className="inline-flex h-10 items-center gap-1 rounded-lg border border-border bg-background px-3 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                   >
-                    {page}
+                    <ChevronLeft size={17} aria-hidden="true" />
+                    Previous
                   </button>
-                ))}
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCurrentPage((page) =>
-                      Math.min(totalPages, page + 1),
-                    )
-                  }
-                  disabled={safeCurrentPage === totalPages}
-                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Next
-                  <ChevronRight className="size-4" aria-hidden="true" />
-                </button>
-              </nav>
-            )}
+                  {Array.from({ length: totalPages }).map((_, index) => {
+                    const page = index + 1;
 
-          {/* Refresh status */}
-          {!isPending && !isError && isFetching && (
-            <p
-              className="mt-5 flex items-center justify-center gap-2 text-xs text-muted-foreground"
-              role="status"
-            >
-              <RefreshCw className="size-3 animate-spin" aria-hidden="true" />
-              Checking for updated requests...
-            </p>
+                    return (
+                      <button
+                        key={page}
+                        type="button"
+                        aria-label={`Go to page ${page}`}
+                        aria-current={safePage === page ? "page" : undefined}
+                        onClick={() => setCurrentPage(page)}
+                        className={`size-10 rounded-lg border text-sm font-semibold transition ${
+                          safePage === page
+                            ? "border-emerald-600 bg-emerald-600 text-white"
+                            : "border-border bg-background hover:bg-muted"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    disabled={safePage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((page) =>
+                        Math.min(totalPages, page + 1),
+                      )
+                    }
+                    className="inline-flex h-10 items-center gap-1 rounded-lg border border-border bg-background px-3 text-sm font-medium transition hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    Next
+                    <ChevronRight size={17} aria-hidden="true" />
+                  </button>
+                </nav>
+              )}
+
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                Showing {(safePage - 1) * PAGE_SIZE + 1}–
+                {Math.min(safePage * PAGE_SIZE, filteredRequests.length)} of{" "}
+                {filteredRequests.length} requests
+              </p>
+            </>
           )}
         </div>
       </section>
 
-      {/* Closing CTA */}
-      <section className="px-5 py-16 sm:px-8 sm:py-20">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-emerald-900/10 bg-emerald-950 px-6 py-12 text-center text-white shadow-xl shadow-emerald-950/10 dark:border-emerald-400/15 dark:bg-[#061a13] sm:px-12 sm:py-16">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -left-20 -top-24 h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl"
-          />
-
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-28 -right-16 h-72 w-72 rounded-full bg-amber-400/15 blur-3xl"
-          />
-
-          <div className="relative mx-auto max-w-2xl">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-300 text-emerald-950 shadow-lg shadow-black/10">
-              <HeartHandshake className="h-7 w-7" aria-hidden="true" />
+      {/* The Daan promise */}
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-12">
+        <div className="overflow-hidden rounded-3xl border border-emerald-600/15 bg-emerald-500/5 p-7 sm:p-10 lg:p-12">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+                THE DAAN PROMISE
+              </p>
+              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl">
+                Giving starts with trust.
+              </h2>
+              <p className="mt-4 leading-8 text-muted-foreground">
+                Every person deserves dignity, compassion, and the
+                chance to be heard. We want donors to make informed
+                decisions based on the information available.
+              </p>
             </div>
 
-            <h2 className="mt-6 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
-              Ready to make a difference?
-            </h2>
-
-            <p className="mt-4 leading-7 text-emerald-50">
-              Sign in to explore the verified donation requests available to
-              donors. Take time to understand each story and choose how you
-              would like to help.
-            </p>
-
-            <Link
-              href="/login"
-              className="group mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-300 px-7 py-4 text-sm font-extrabold text-emerald-950 shadow-lg transition duration-300 hover:-translate-y-1 hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-950"
-            >
-              Continue as a Donor
-              <ArrowRight
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
-            </Link>
+            <div className="grid gap-5 sm:grid-cols-3">
+              {[
+                {
+                  title: "Verified Requests",
+                  description:
+                    "Requests are reviewed by an administrator before being marked verified.",
+                },
+                {
+                  title: "Understand Their Story",
+                  description:
+                    "Review the circumstances and needs described in each request.",
+                },
+                {
+                  title: "Give With Confidence",
+                  description:
+                    "Make a thoughtful choice using the information provided.",
+                },
+              ].map((item, index) => (
+                <div key={item.title} className="rounded-2xl bg-background p-5">
+                  <span className="text-sm font-bold text-emerald-600">
+                    0{index + 1}
+                  </span>
+                  <h3 className="mt-3 font-bold">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="border-t">
+        <div className="mx-auto max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-20">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+            <HeartHandshake size={28} aria-hidden="true" />
+          </div>
+          <h2 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+            Someone needs help. You can make a difference.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl leading-7 text-muted-foreground">
+            Take a moment to understand a person&apos;s situation.
+            Even a thoughtful decision to help can bring hope.
+          </p>
+          <a
+            href="#verified-requests"
+            className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-700"
+          >
+            Explore Requests
+            <ArrowRight size={18} aria-hidden="true" />
+          </a>
         </div>
       </section>
     </main>
